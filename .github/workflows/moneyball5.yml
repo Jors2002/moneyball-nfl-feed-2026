@@ -1,0 +1,89 @@
+
+name: Moneyball NFL 2026 - feed automatico
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Lunes y martes, 07:20 Monterrey
+    - cron: '20 13 * * 1,2'
+
+    # Viernes, 20:20 Monterrey
+    - cron: '20 2 * * 6'
+
+    # Domingo, 08:20 Monterrey
+    - cron: '20 14 * * 0'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: moneyball-feed-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  feed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Obtener repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Procesar estadisticas NFL
+        run: |
+          mkdir -p data
+          python moneyball5_etl.py --output data/_MONEYBALL_FEED_2026.json
+
+      - name: Validar feed antes de publicar
+        run: |
+          python - <<'PY'
+          import gzip
+          import json
+          from pathlib import Path
+
+          compressed = Path("data/_MONEYBALL_FEED_2026.json.gz")
+          assert compressed.is_file(), "No se genero el archivo GZIP"
+
+          with gzip.open(compressed, "rt", encoding="utf-8") as f:
+              feed = json.load(f)
+
+          assert feed.get("schemaVersion") == 5, "Esquema incorrecto"
+          assert feed.get("season") == 2026, "Temporada incorrecta"
+
+          players = feed.get("bySleeper", {})
+          assert isinstance(players, dict), "Formato de jugadores incorrecto"
+          assert len(players) >= 100, "Cobertura insuficiente"
+
+          through = int(feed.get("thruWeek", 0))
+          assert 1 <= through <= 18, "Semana invalida"
+
+          print("MONEYBALL VALIDACION OK")
+          print("Jugadores:", len(players))
+          print("Hasta semana:", through)
+          print("Fuentes:", feed.get("sources", {}))
+          PY
+
+      - name: Publicar feed comprimido
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/_MONEYBALL_FEED_2026.json.gz
+
+          if git diff --cached --quiet; then
+            echo "No hay cambios para publicar."
+          else
+            git commit -m "Actualizar feed NFL 2026"
+            git push
+          fi
