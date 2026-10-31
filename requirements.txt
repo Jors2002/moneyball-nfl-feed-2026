@@ -1,0 +1,4 @@
+pandas>=2.2,<3
+pyarrow>=17,<24
+requests>=2.31,<3
+pytest>=8,<10
