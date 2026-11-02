@@ -1,0 +1,25 @@
+name: Moneyball 6.0 - pruebas de calidad
+
+on:
+  pull_request:
+    paths:
+      - 'moneyball6_validate.py'
+      - 'tests/test_moneyball6_validate.py'
+      - '.github/workflows/moneyball6-quality.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Obtener codigo
+        uses: actions/checkout@v5
+      - name: Configurar Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Ejecutar pruebas offline
+        run: python -m unittest discover -s tests -p 'test_moneyball6_validate.py' -v
