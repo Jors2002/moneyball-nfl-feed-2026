@@ -13,6 +13,7 @@ import argparse
 from datetime import datetime, timezone
 import gzip
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -94,6 +95,7 @@ def audit(feed: Any, max_age_hours: float = 48) -> dict[str, Any]:
                     value = row.get(name)
                     if value is not None and (isinstance(value, bool)
                                               or not isinstance(value, (int, float))
+                                              or not math.isfinite(value)
                                               or not 0 <= value <= 1):
                         errors.append(f"{name} fuera de rango: {sid}/{week}")
                 if row.get("routes") is not None and row.get("teamDropbacks") is not None:
