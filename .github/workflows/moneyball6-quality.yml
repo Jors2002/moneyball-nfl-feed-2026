@@ -23,3 +23,14 @@ jobs:
           python-version: '3.12'
       - name: Ejecutar pruebas offline
         run: python -m unittest discover -s tests -p 'test_moneyball6_validate.py' -v
+      - name: Auditar feed real comprimido
+        run: |
+          test -s data/_MONEYBALL_FEED_2026.json.gz
+          python moneyball6_validate.py data/_MONEYBALL_FEED_2026.json.gz --max-age-hours 168 --report moneyball6_quality.json
+      - name: Conservar reporte de auditoria
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: moneyball6-quality-report
+          path: moneyball6_quality.json
+          if-no-files-found: warn
