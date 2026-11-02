@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'moneyball6_validate.py'
+      - 'moneyball5_etl.py'
       - 'tests/test_moneyball6_validate.py'
       - '.github/workflows/moneyball6-quality.yml'
   workflow_dispatch:
@@ -21,6 +22,8 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - name: Verificar sintaxis de ETL y validador
+        run: python -m py_compile moneyball5_etl.py moneyball6_validate.py
       - name: Ejecutar pruebas offline
         run: python -m unittest discover -s tests -p 'test_moneyball6_validate.py' -v
       - name: Auditar feed real comprimido

@@ -509,6 +509,16 @@ def main() -> None:
     # pandas/numpy producen np.int64 (por ejemplo en coverage.pbpWeeks), que
     # json.dumps estándar no sabe codificar. Conservar nulos; no cambiar datos.
     feed=json_native(feed)
+    # Quality gate 6.0: los errores estructurales impiden reemplazar el último
+    # feed válido. La falta de datos opcionales se reporta, no se inventa.
+    from moneyball6_validate import audit
+    quality = audit(feed)
+    if quality["errors"]:
+        raise RuntimeError("MONEYBALL6_QUALITY_FAIL " + json.dumps(
+            quality["errors"], ensure_ascii=False))
+    print("MONEYBALL6_QUALITY", json.dumps(
+        {"status": quality["status"], "warnings": quality["warnings"],
+         "metrics": quality["metrics"]}, ensure_ascii=False))
     tmp.write_text(json.dumps(feed,ensure_ascii=False,separators=(",",":"),allow_nan=False),encoding="utf-8")
     tmp.replace(target)
     # Publicar versión gzip adicional: GitHub Raw y Apps Script leen el archivo
