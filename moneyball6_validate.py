@@ -87,17 +87,27 @@ def audit(feed: Any, max_age_hours: float = 48) -> dict[str, Any]:
                 if week in seen:
                     errors.append(f"Jugador-semana duplicado: {sid}/{week}")
                 seen.add(week)
-                for name in ("targets", "carries", "snaps", "routes", "firstReads"):
+                for name in ("targets", "carries", "snaps", "routes", "firstReads",
+                             "receptions", "teamSnaps", "teamDropbacks",
+                             "redzoneCarries", "inside5Carries", "redzoneTargets",
+                             "inside5Targets", "thirdDownTouches", "twoMinuteTouches",
+                             "thirdDownOpportunities", "twoMinuteOpportunities"):
                     value = row.get(name)
                     if value is not None and (type(value) is not int or value < 0):
                         errors.append(f"{name} inválido: {sid}/{week}")
-                for name in ("snapShare", "targetShare", "firstReadShare", "routeParticipation"):
+                for name in ("snapShare", "targetShare", "firstReadShare", "routeParticipation", "targetsPerRoute"):
                     value = row.get(name)
                     if value is not None and (isinstance(value, bool)
                                               or not isinstance(value, (int, float))
                                               or not math.isfinite(value)
                                               or not 0 <= value <= 1):
                         errors.append(f"{name} fuera de rango: {sid}/{week}")
+                for name in ("ppr", "receivingAirYards", "airYardsShare", "wopr", "aDOT"):
+                    value = row.get(name)
+                    # Air yards and fantasy scores can legitimately be negative.
+                    if value is not None and (isinstance(value, bool) or
+                            not isinstance(value, (int, float)) or not math.isfinite(value)):
+                        errors.append(f"{name} no finito/numerico: {sid}/{week}")
                 if row.get("routes") is not None and row.get("teamDropbacks") is not None:
                     routes, drops = row["routes"], row["teamDropbacks"]
                     if type(routes) is int and type(drops) is int and routes > drops:

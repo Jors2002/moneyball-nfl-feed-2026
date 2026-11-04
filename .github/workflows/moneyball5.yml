@@ -10,6 +10,7 @@ on:
       - 'moneyball7_publish.py'
       - 'moneyball7_context.py'
       - 'moneyball72_projection.py'
+      - 'moneyball8_*.py'
       - '.github/workflows/moneyball5.yml'
   schedule:
     # Lunes y martes, 07:20 Monterrey
@@ -47,6 +48,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
+
+      - name: Probar todos los módulos antes de actualizar datos
+        run: python -m pytest -q
+
+      - name: Reusar fuentes históricas 8.0
+        uses: actions/cache@v4
+        with:
+          path: .cache/moneyball8
+          key: moneyball8-nflverse-v1-${{ github.run_id }}
+          restore-keys: moneyball8-nflverse-v1-
 
       - name: Procesar estadisticas NFL
         run: |
@@ -102,6 +113,14 @@ jobs:
             --source-gzip data/_MONEYBALL_FEED_2026.json.gz \
             --output data/_MONEYBALL72_PROJECTION_2026.json.gz
 
+      - name: Generar pronóstico 8.0 con fuentes cacheadas y corte validado
+        continue-on-error: true
+        run: |
+          python moneyball8_pipeline.py \
+            --source-gzip data/_MONEYBALL_FEED_2026.json.gz \
+            --output data/_MONEYBALL8_FORECAST_2026.json.gz \
+            --pass-int-points -1
+
       - name: Publicar feed comprimido
         run: |
           git config user.name "github-actions[bot]"
@@ -115,6 +134,9 @@ jobs:
             git add data/_MONEYBALL72_PROJECTION_2026.json.gz
           fi
 
+          if test -s data/_MONEYBALL8_FORECAST_2026.json.gz; then
+            git add data/_MONEYBALL8_FORECAST_2026.json.gz data/_MONEYBALL8_VALIDATION.json data/history/
+          fi
           if git diff --cached --quiet; then
             echo "No hay cambios para publicar."
           else

@@ -40,6 +40,23 @@ ATTRIBUTIONS = {
     "DynastyProcess": "https://github.com/dynastyprocess/data",
 }
 
+# Additive schema-5 migration: old consumers keep their keys, but those names
+# never meant completed touches. A target includes an incomplete pass.
+METRIC_DEFINITIONS = {
+    "thirdDownOpportunities": {
+        "definition": "Observed carries (excluding QB kneels) plus directed pass targets, including incompletions, on third down.",
+        "scope": "Observed PBP opportunities; not touches, receptions, snaps or routes. Missing coverage remains null.",
+    },
+    "twoMinuteOpportunities": {
+        "definition": "Observed carries (excluding QB kneels) plus directed pass targets, including incompletions, in Q2 or Q4 with 0 through 120 seconds remaining (inclusive).",
+        "scope": "Clock-window proxy; not personnel participation or a verified two-minute offense designation. Missing coverage remains null.",
+    },
+    "thirdDownTouches": {"deprecated": True, "aliasOf": "thirdDownOpportunities",
+                         "reason": "Legacy name includes incomplete targets; never interpret as completed touches."},
+    "twoMinuteTouches": {"deprecated": True, "aliasOf": "twoMinuteOpportunities",
+                         "reason": "Legacy name includes incomplete targets; never interpret as completed touches."},
+}
+
 
 def pull(url: str, dest: Path, hours: float = 6) -> Path:
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -292,6 +309,9 @@ def pbp_index(pbp:pd.DataFrame | None,gsis_to_sid:dict[str,str],through:int):
     if "qb_dropback" in s.columns:
         x=s[pd.to_numeric(s.qb_dropback,errors="coerce").eq(1)].groupby(["week","posteam"]).size()
         drops={(int(w),str(t)):int(n) for (w,t),n in x.items()}
+    for rec in players.values():
+        rec["thirdDownOpportunities"] = rec["thirdDownTouches"]
+        rec["twoMinuteOpportunities"] = rec["twoMinuteTouches"]
     return players,teams,{"drops":drops,"pbp":s}
 
 
@@ -404,7 +424,9 @@ def make_feed(cross:pd.DataFrame,stats:pd.DataFrame,snaps:pd.DataFrame|None,
               "receivingAirYards":None,"airYardsShare":None,"wopr":None,"aDOT":None,
               "teamDropbacks":None,"routeParticipation":None,"targetsPerRoute":None,
               "redzoneCarries":None,"inside5Carries":None,"redzoneTargets":None,
-              "inside5Targets":None,"firstReads":None,"firstReadShare":None}
+              "inside5Targets":None,"firstReads":None,"firstReadShare":None,
+              "thirdDownTouches":None,"twoMinuteTouches":None,
+              "thirdDownOpportunities":None,"twoMinuteOpportunities":None}
         for source in (box,snaps_idx,usage,ftn_idx,route_idx):
             base.update(source.get((sid,w),{}))
         # Source coverage: zero is meaningful only when team has charted plays and player appeared.
@@ -474,6 +496,7 @@ def make_feed(cross:pd.DataFrame,stats:pd.DataFrame,snaps:pd.DataFrame|None,
     return {"schemaVersion":5,"season":SEASON,"generatedAt":datetime.now(timezone.utc).isoformat(),
             "fromWeek":1,"thruWeek":through,"mappedPlayers":len(by),
             "sources":src,"coverage":coverage,"identity":ids,"attribution":ATTRIBUTIONS,
+            "metricDefinitions":METRIC_DEFINITIONS,
             "sourceUrls":SOURCES,
             "bySleeper":by,"injuriesBySleeper":injuries_by}
 

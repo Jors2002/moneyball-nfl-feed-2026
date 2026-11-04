@@ -1,0 +1,485 @@
+{
+  "schemaVersion": 80,
+  "module": "position_ppr_forecast_validation",
+  "generatedAt": "2026-11-04T23:30:22.696737+00:00",
+  "scoring": {
+    "basis": "nflverse fantasy_points_ppr",
+    "source_pass_int_points": -2,
+    "pass_int_points": -1.0,
+    "restriction": "Other custom scoring rules require separate reconciliation"
+  },
+  "positions": {
+    "QB": {
+      "status": "HELD_OUT_EVALUATED_CONDITIONAL_ON_OBSERVED_GAME",
+      "selected_model": "opportunity_ridge",
+      "candidate_model": "position_ridge",
+      "deployment_model": "opportunity_ridge",
+      "deployment_status": "PROSPECTIVE_VALIDATION_PENDING",
+      "deployment_selection_partition": "2026_W4_8",
+      "deployment_interval80_radius": 10.02401,
+      "deployment_interval80_selection_coverage": 0.82946,
+      "deployment_evaluation_label": "IN_SAMPLE_SELECTION: selected after inspecting final partition; no untouched test for deployed policy",
+      "simple_baseline_preselected": "opportunity_ridge",
+      "promotion_gate": "ADVANCED_REJECTED_BASELINE_RETAINED",
+      "selection": {
+        "season_mean": {
+          "n": 401,
+          "mae": 6.44321,
+          "rmse": 8.2435,
+          "bias": -1.10055
+        },
+        "recent4": {
+          "n": 401,
+          "mae": 6.6681,
+          "rmse": 8.52919,
+          "bias": -0.21895
+        },
+        "opportunity_ridge": {
+          "n": 401,
+          "mae": 6.41533,
+          "rmse": 8.18147,
+          "bias": -0.88943
+        },
+        "position_ridge": {
+          "n": 401,
+          "mae": 6.26008,
+          "rmse": 8.02991,
+          "bias": -0.65153
+        }
+      },
+      "calibration_n": 132,
+      "interval80_radius": 10.02401,
+      "test": {
+        "season_mean": {
+          "n": 272,
+          "mae": 6.90251,
+          "rmse": 8.6563,
+          "bias": 0.25151
+        },
+        "recent4": {
+          "n": 272,
+          "mae": 7.09894,
+          "rmse": 9.0283,
+          "bias": 0.38329
+        },
+        "opportunity_ridge": {
+          "n": 272,
+          "mae": 6.58815,
+          "rmse": 8.36409,
+          "bias": 0.26415
+        },
+        "position_ridge": {
+          "n": 272,
+          "mae": 6.66331,
+          "rmse": 8.34405,
+          "bias": 0.56144
+        }
+      },
+      "test_label": "2025 SECOND_VALIDATION_DEPLOYMENT_GATE; not final test",
+      "test_interval80_coverage": 0.76103,
+      "final_test": {
+        "season": 2026,
+        "through_week": 8,
+        "selected_model": {
+          "n": 129,
+          "mae": 6.33256,
+          "rmse": 7.82877,
+          "bias": 0.17667
+        },
+        "all_models": {
+          "season_mean": {
+            "n": 129,
+            "mae": 6.47714,
+            "rmse": 8.01389,
+            "bias": 0.5196
+          },
+          "recent4": {
+            "n": 129,
+            "mae": 6.67218,
+            "rmse": 8.09206,
+            "bias": 0.62474
+          },
+          "opportunity_ridge": {
+            "n": 129,
+            "mae": 6.33256,
+            "rmse": 7.82877,
+            "bias": 0.17667
+          },
+          "position_ridge": {
+            "n": 129,
+            "mae": 6.13976,
+            "rmse": 7.59764,
+            "bias": 0.42766
+          }
+        },
+        "interval80_coverage": 0.82946,
+        "policy_frozen_before_this_partition": true
+      },
+      "calibration_claim": "NOT_ESTABLISHED: temporal and availability shift remain",
+      "advanced_beats_recent4_on_test": true
+    },
+    "RB": {
+      "status": "HELD_OUT_EVALUATED_CONDITIONAL_ON_OBSERVED_GAME",
+      "selected_model": "position_ridge",
+      "candidate_model": "position_ridge",
+      "deployment_model": "opportunity_ridge",
+      "deployment_status": "PROSPECTIVE_VALIDATION_PENDING",
+      "deployment_selection_partition": "2026_W4_8",
+      "deployment_interval80_radius": 9.60885,
+      "deployment_interval80_selection_coverage": 0.85279,
+      "deployment_evaluation_label": "IN_SAMPLE_SELECTION: selected after inspecting final partition; no untouched test for deployed policy",
+      "simple_baseline_preselected": "opportunity_ridge",
+      "promotion_gate": "CANDIDATE_RETAINED",
+      "selection": {
+        "season_mean": {
+          "n": 644,
+          "mae": 5.83731,
+          "rmse": 7.27514,
+          "bias": 0.56241
+        },
+        "recent4": {
+          "n": 644,
+          "mae": 6.02294,
+          "rmse": 7.52829,
+          "bias": 0.88601
+        },
+        "opportunity_ridge": {
+          "n": 644,
+          "mae": 5.80293,
+          "rmse": 7.31205,
+          "bias": -0.25195
+        },
+        "position_ridge": {
+          "n": 644,
+          "mae": 5.69173,
+          "rmse": 7.11481,
+          "bias": -0.00354
+        }
+      },
+      "calibration_n": 204,
+      "interval80_radius": 9.85721,
+      "test": {
+        "season_mean": {
+          "n": 470,
+          "mae": 5.89959,
+          "rmse": 7.87081,
+          "bias": -0.19615
+        },
+        "recent4": {
+          "n": 470,
+          "mae": 6.10572,
+          "rmse": 7.9435,
+          "bias": 0.59708
+        },
+        "opportunity_ridge": {
+          "n": 470,
+          "mae": 5.88647,
+          "rmse": 7.82449,
+          "bias": -0.22237
+        },
+        "position_ridge": {
+          "n": 470,
+          "mae": 5.77991,
+          "rmse": 7.67699,
+          "bias": -0.27495
+        }
+      },
+      "test_label": "2025 SECOND_VALIDATION_DEPLOYMENT_GATE; not final test",
+      "test_interval80_coverage": 0.84681,
+      "final_test": {
+        "season": 2026,
+        "through_week": 8,
+        "selected_model": {
+          "n": 197,
+          "mae": 6.04472,
+          "rmse": 7.64199,
+          "bias": -0.68873
+        },
+        "all_models": {
+          "season_mean": {
+            "n": 197,
+            "mae": 6.3272,
+            "rmse": 8.12525,
+            "bias": -0.47104
+          },
+          "recent4": {
+            "n": 197,
+            "mae": 6.31104,
+            "rmse": 7.96626,
+            "bias": -0.27788
+          },
+          "opportunity_ridge": {
+            "n": 197,
+            "mae": 5.98657,
+            "rmse": 7.56604,
+            "bias": -0.66226
+          },
+          "position_ridge": {
+            "n": 197,
+            "mae": 6.04472,
+            "rmse": 7.64199,
+            "bias": -0.68873
+          }
+        },
+        "interval80_coverage": 0.85787,
+        "policy_frozen_before_this_partition": true
+      },
+      "calibration_claim": "NOT_ESTABLISHED: temporal and availability shift remain",
+      "advanced_beats_recent4_on_test": true
+    },
+    "WR": {
+      "status": "HELD_OUT_EVALUATED_CONDITIONAL_ON_OBSERVED_GAME",
+      "selected_model": "position_ridge",
+      "candidate_model": "position_ridge",
+      "deployment_model": "opportunity_ridge",
+      "deployment_status": "PROSPECTIVE_VALIDATION_PENDING",
+      "deployment_selection_partition": "2026_W4_8",
+      "deployment_interval80_radius": 8.9412,
+      "deployment_interval80_selection_coverage": 0.82353,
+      "deployment_evaluation_label": "IN_SAMPLE_SELECTION: selected after inspecting final partition; no untouched test for deployed policy",
+      "simple_baseline_preselected": "season_mean",
+      "promotion_gate": "CANDIDATE_RETAINED",
+      "selection": {
+        "season_mean": {
+          "n": 1069,
+          "mae": 5.75007,
+          "rmse": 7.57174,
+          "bias": -0.17272
+        },
+        "recent4": {
+          "n": 1069,
+          "mae": 6.07383,
+          "rmse": 7.81909,
+          "bias": 0.48025
+        },
+        "opportunity_ridge": {
+          "n": 1069,
+          "mae": 5.82988,
+          "rmse": 7.57985,
+          "bias": -0.45566
+        },
+        "position_ridge": {
+          "n": 1069,
+          "mae": 5.69989,
+          "rmse": 7.49455,
+          "bias": -0.61794
+        }
+      },
+      "calibration_n": 325,
+      "interval80_radius": 8.68231,
+      "test": {
+        "season_mean": {
+          "n": 682,
+          "mae": 5.69281,
+          "rmse": 7.23148,
+          "bias": 0.68473
+        },
+        "recent4": {
+          "n": 682,
+          "mae": 5.78232,
+          "rmse": 7.3056,
+          "bias": 1.09348
+        },
+        "opportunity_ridge": {
+          "n": 682,
+          "mae": 5.70589,
+          "rmse": 7.22991,
+          "bias": 0.66815
+        },
+        "position_ridge": {
+          "n": 682,
+          "mae": 5.56031,
+          "rmse": 7.09412,
+          "bias": 0.4952
+        }
+      },
+      "test_label": "2025 SECOND_VALIDATION_DEPLOYMENT_GATE; not final test",
+      "test_interval80_coverage": 0.81232,
+      "final_test": {
+        "season": 2026,
+        "through_week": 8,
+        "selected_model": {
+          "n": 323,
+          "mae": 5.84684,
+          "rmse": 7.50037,
+          "bias": 0.14239
+        },
+        "all_models": {
+          "season_mean": {
+            "n": 323,
+            "mae": 6.12365,
+            "rmse": 7.91109,
+            "bias": 0.50714
+          },
+          "recent4": {
+            "n": 323,
+            "mae": 6.19098,
+            "rmse": 7.9647,
+            "bias": 0.74197
+          },
+          "opportunity_ridge": {
+            "n": 323,
+            "mae": 5.81646,
+            "rmse": 7.48031,
+            "bias": 0.0872
+          },
+          "position_ridge": {
+            "n": 323,
+            "mae": 5.84684,
+            "rmse": 7.50037,
+            "bias": 0.14239
+          }
+        },
+        "interval80_coverage": 0.80495,
+        "policy_frozen_before_this_partition": true
+      },
+      "calibration_claim": "NOT_ESTABLISHED: temporal and availability shift remain",
+      "advanced_beats_recent4_on_test": true
+    },
+    "TE": {
+      "status": "HELD_OUT_EVALUATED_CONDITIONAL_ON_OBSERVED_GAME",
+      "selected_model": "season_mean",
+      "candidate_model": "season_mean",
+      "deployment_model": "opportunity_ridge",
+      "deployment_status": "PROSPECTIVE_VALIDATION_PENDING",
+      "deployment_selection_partition": "2026_W4_8",
+      "deployment_interval80_radius": 8.1391,
+      "deployment_interval80_selection_coverage": 0.77931,
+      "deployment_evaluation_label": "IN_SAMPLE_SELECTION: selected after inspecting final partition; no untouched test for deployed policy",
+      "simple_baseline_preselected": "season_mean",
+      "promotion_gate": "CANDIDATE_RETAINED",
+      "selection": {
+        "season_mean": {
+          "n": 403,
+          "mae": 5.15404,
+          "rmse": 6.61698,
+          "bias": -1.0049
+        },
+        "recent4": {
+          "n": 403,
+          "mae": 5.34518,
+          "rmse": 6.73479,
+          "bias": 0.08186
+        },
+        "opportunity_ridge": {
+          "n": 403,
+          "mae": 5.20066,
+          "rmse": 6.62424,
+          "bias": -0.33915
+        },
+        "position_ridge": {
+          "n": 403,
+          "mae": 5.15518,
+          "rmse": 6.5355,
+          "bias": -0.31883
+        }
+      },
+      "calibration_n": 136,
+      "interval80_radius": 7.71429,
+      "test": {
+        "season_mean": {
+          "n": 305,
+          "mae": 4.79765,
+          "rmse": 6.2961,
+          "bias": 0.46458
+        },
+        "recent4": {
+          "n": 305,
+          "mae": 5.06281,
+          "rmse": 6.63709,
+          "bias": 1.13986
+        },
+        "opportunity_ridge": {
+          "n": 305,
+          "mae": 4.80077,
+          "rmse": 6.26744,
+          "bias": 0.55559
+        },
+        "position_ridge": {
+          "n": 305,
+          "mae": 4.77799,
+          "rmse": 6.22926,
+          "bias": 0.69539
+        }
+      },
+      "test_label": "2025 SECOND_VALIDATION_DEPLOYMENT_GATE; not final test",
+      "test_interval80_coverage": 0.80328,
+      "final_test": {
+        "season": 2026,
+        "through_week": 8,
+        "selected_model": {
+          "n": 145,
+          "mae": 5.80825,
+          "rmse": 7.02145,
+          "bias": 1.01634
+        },
+        "all_models": {
+          "season_mean": {
+            "n": 145,
+            "mae": 5.80825,
+            "rmse": 7.02145,
+            "bias": 1.01634
+          },
+          "recent4": {
+            "n": 145,
+            "mae": 5.92615,
+            "rmse": 7.16117,
+            "bias": 1.15006
+          },
+          "opportunity_ridge": {
+            "n": 145,
+            "mae": 5.43993,
+            "rmse": 6.46655,
+            "bias": 0.43103
+          },
+          "position_ridge": {
+            "n": 145,
+            "mae": 5.55969,
+            "rmse": 6.61516,
+            "bias": 0.65434
+          }
+        },
+        "interval80_coverage": 0.74483,
+        "policy_frozen_before_this_partition": true
+      },
+      "calibration_claim": "NOT_ESTABLISHED: temporal and availability shift remain",
+      "advanced_beats_recent4_on_test": true
+    }
+  },
+  "split": {
+    "selection_season": 2024,
+    "calibration_season": 2025,
+    "calibration_through_week": 8,
+    "second_validation_gate_weeks": [
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "final_test_season": 2026,
+    "final_test_through_week": 8,
+    "training": "expanding player-week observations strictly before each target week"
+  },
+  "sample": {
+    "source_rows": 20404,
+    "feature_rows": 8346,
+    "predictions": 8030
+  },
+  "limitations": [
+    "Conditional on recorded games; unobserved absences are NOT zeros.",
+    "Eligibility requires >=3 prior same-season games, recent4 >=5 PPR and prior observation <=2 weeks ago.",
+    "Revised historical snapshots: publication-time availability is unproven.",
+    "No opponent, schedule, official practice, availability, market baseline, K or DST model.",
+    "Position ridge fixed penalty=30;2025 late-season validation gates promotion against simple baseline preselected in2024.",
+    "Final2026 W4-8 partition does not alter frozen production policy; retrospective revised snapshots are not a prospective trial.",
+    "Deployment may retain a better simple baseline selected using2026 W4-8; frozen-policy final_test remains unchanged and deployed policy needs prospective validation.",
+    "Symmetric 80% residual intervals are candidate predictive intervals, not guaranteed floors/ceilings.",
+    "No championship odds or trade acceptance probabilities."
+  ]
+}

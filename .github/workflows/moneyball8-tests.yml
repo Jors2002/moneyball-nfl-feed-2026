@@ -1,0 +1,36 @@
+name: Moneyball 8 validated forecasting and decisions
+on:
+  pull_request:
+    paths:
+      - 'moneyball8_*.py'
+      - 'moneyball5_etl.py'
+      - 'moneyball6_validate.py'
+      - 'tests/**'
+      - 'apps_script/**'
+      - 'requirements.txt'
+      - '.github/workflows/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -r requirements.txt
+      - run: python -m pytest -q
+      - run: node tests/test_moneyball8_apps_script.js
+      - name: Verify actual published NFL forecast contract
+        run: |
+          python - <<'PY'
+          import gzip, json
+          from moneyball8_pipeline import validate_prediction
+          with gzip.open('data/_MONEYBALL8_FORECAST_2026.json.gz','rt') as f:
+              feed=json.load(f)
+          print('NFL_FORECAST_CONTRACT_OK',validate_prediction(feed,feed['season'],feed['asOfWeek']))
+          PY
