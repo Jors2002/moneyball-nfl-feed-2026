@@ -1,0 +1,35 @@
+name: Moneyball 7 scouting unit and integration tests
+
+on:
+  pull_request:
+    paths:
+      - 'moneyball7_scout.py'
+      - 'moneyball7_publish.py'
+      - 'tests/test_moneyball7_*.py'
+      - '.github/workflows/moneyball7-tests.yml'
+      - '.github/workflows/moneyball5.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - run: python -m py_compile moneyball7_scout.py moneyball7_publish.py
+      - run: python -m pytest -q tests/test_moneyball7_scout.py tests/test_moneyball7_publish.py tests/test_moneyball6_validate.py
+      - name: Validate actual compressed feed and publish scouting artifact
+        run: |
+          python moneyball6_validate.py data/_MONEYBALL_FEED_2026.json.gz --max-age-hours 168
+          python moneyball7_publish.py --input data/_MONEYBALL_FEED_2026.json.gz --output moneyball7_scoring_preview.json.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: moneyball7-scout-preview
+          path: moneyball7_scoring_preview.json.gz
