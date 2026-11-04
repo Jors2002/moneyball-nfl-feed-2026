@@ -74,12 +74,17 @@ def walk_forward(by_sleeper: dict, as_of_week: int) -> dict:
             guess = baseline(games, week - 1)
             if guess["mean"] is None or guess["quality"] == "STALE_PLAYER_HISTORY":
                 continue
+            # Backtest fantasy-relevant candidates only. Otherwise thousands
+            # of 0-point fringe players make the apparent MAE misleadingly tiny.
+            if guess["mean"] < 5.0:
+                continue
             deviation = guess["mean"] - actual
             errors.append((week, deviation))
             samples_per_week[week] = samples_per_week.get(week, 0) + 1
     if not errors:
         return {"status": "INSUFFICIENT_DATA", "examples": 0,
-                "mae": None, "bias": None, "weeksTested": [], "nByWeek": {}}
+                "mae": None, "bias": None, "weeksTested": [], "nByWeek": {},
+                "eligibility": "historical baseline >= 5 PPR"}
     absolute = [abs(e) for _, e in errors]
     errors_by_week = sorted(samples_per_week)
     # Scores conditional on participation, with survivor bias. Do NOT label
@@ -90,7 +95,7 @@ def walk_forward(by_sleeper: dict, as_of_week: int) -> dict:
             "bias": round(mean(e for _, e in errors), 4),
             "medianAbsoluteError": round(median(absolute), 4),
             "weeksTested": errors_by_week, "nByWeek": {str(w): samples_per_week[w] for w in errors_by_week},
-            "restriction": "Only games with observed PPR; byes, missed games, lineup decisions and availability are NOT modeled."}
+            "restriction": "Only players with >=5 historical PPR baseline and a later observed PPR game. Byes, missed games, lineup decisions, availability and opponent are NOT modeled.", "eligibility": "historical baseline >= 5 PPR"}
 
 
 def evidence_date(raw, generated_at: datetime) -> tuple[str | None, str]:
