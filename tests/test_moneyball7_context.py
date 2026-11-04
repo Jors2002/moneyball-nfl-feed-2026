@@ -1,7 +1,7 @@
 """Offline Moneyball 7 defense and kicker observed-event tests."""
 import pandas as pd
 import pytest
-from moneyball7_context import build_context
+from moneyball7_context import build_context, merge_weekly_kickers
 
 def fixture():
     return pd.DataFrame([
@@ -73,3 +73,42 @@ def test_incomplete_latest_week_rejected():
 def test_mandatory_columns():
     with pytest.raises(ValueError,match="Missing required"):
         build_context(fixture().drop(columns=["defteam"]),{},8)
+
+
+def test_kicker_weekly_fallback_fills_missing_pbp_ids():
+    context=build_context(fixture().drop(columns=[
+        "field_goal_kicker_player_id", "extra_point_kicker_player_id"
+    ]), {"00-0000001":"12345"}, 8)
+    stats=pd.DataFrame([
+        {"season":2026,"season_type":"REG","week":8,"player_id":"00-0000001",
+         "position":"K","fg_att":2,"fg_made":1,"pat_att":4,"pat_made":4}
+    ])
+    out=merge_weekly_kickers(context,stats,{"00-0000001":"12345"},8)
+    row=out["byKickerSleeper"]["12345"][0]
+    assert row["fieldGoalAttempts"]==2
+    assert row["fieldGoalsMade"]==1
+    assert row["extraPointAttempts"]==4
+    assert out["coverage"]["kickerMappedWeeks"]==1
+
+def test_missing_kicker_column_remains_null():
+    context=build_context(fixture().drop(columns=[
+        "field_goal_kicker_player_id", "extra_point_kicker_player_id"
+    ]),{},8)
+    stats=pd.DataFrame([
+        {"season":2026,"season_type":"REG","week":8,"player_id":"00-0000001",
+         "position":"K","fg_att":2}
+    ])
+    out=merge_weekly_kickers(context,stats,{"00-0000001":"12345"},8)
+    row=out["byKickerSleeper"]["12345"][0]
+    assert row["fieldGoalAttempts"]==2
+    assert row["fieldGoalsMade"] is None
+    assert row["extraPointAttempts"] is None
+
+def test_future_kicker_week_excluded():
+    context=build_context(fixture(),{},8)
+    stats=pd.DataFrame([
+        {"season":2026,"season_type":"REG","week":9,"player_id":"00-0000001",
+         "position":"K","fg_att":33,"fg_made":33}
+    ])
+    out=merge_weekly_kickers(context,stats,{"00-0000001":"12345"},8)
+    assert out["coverage"]["kickers"]==0
