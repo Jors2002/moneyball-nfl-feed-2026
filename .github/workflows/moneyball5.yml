@@ -3,6 +3,12 @@ name: Moneyball NFL 2026 - feed automatico
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'moneyball7_scout.py'
+      - 'moneyball7_publish.py'
+      - '.github/workflows/moneyball5.yml'
   schedule:
     # Lunes y martes, 07:20 Monterrey
     - cron: '20 13 * * 1,2'
