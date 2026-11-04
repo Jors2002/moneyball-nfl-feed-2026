@@ -123,6 +123,62 @@ def build_context(pbp: pd.DataFrame, gsis_to_sid: dict[str, str], through: int) 
             "byDefense": defense, "byKickerSleeper": bykicker}
 
 
+def merge_weekly_kickers(context: dict, stats: pd.DataFrame,
+                         gsis_to_sid: dict[str, str], through: int) -> dict:
+    """Use official-style weekly kicking counts when PBP lacks kicker identity.
+
+    nflverse player_stats weekly has K position and fg_att/fg_made,
+    pat_att/pat_made (if actually present). Never infer absent values.
+    """
+    required = {"season", "week", "season_type", "player_id", "position"}
+    if not required.issubset(stats.columns):
+        context["coverage"]["kickerStatsStatus"] = "NO DISPONIBLE: columnas básicas ausentes"
+        return context
+    usable = [x for x in ("fg_att", "fg_made", "pat_att", "pat_made") if x in stats.columns]
+    if not usable:
+        context["coverage"]["kickerStatsStatus"] = "NO DISPONIBLE: columnas FG/PAT ausentes"
+        return context
+    filtered = stats.loc[
+        (pd.to_numeric(stats.season, errors="coerce") == SEASON)
+        & (stats.season_type.astype(str).str.upper() == "REG")
+        & (stats.position.astype(str).str.upper() == "K")
+        & pd.to_numeric(stats.week, errors="coerce").between(1, through)
+    ].copy()
+    mapping = {"fg_att": "fieldGoalAttempts", "fg_made": "fieldGoalsMade",
+               "pat_att": "extraPointAttempts", "pat_made": "extraPointsMade"}
+    updated = 0
+    for (week, gid), group in filtered.groupby(["week", "player_id"], dropna=True):
+        sid = gsis_to_sid.get(str(gid).strip())
+        if not sid:
+            continue
+        row = {"week": int(week), "fieldGoalAttempts": None,
+               "fieldGoalsMade": None, "extraPointAttempts": None,
+               "extraPointsMade": None, "fieldGoalDistancesMade": None}
+        for source, output in mapping.items():
+            if source not in usable:
+                continue
+            numeric = pd.to_numeric(group[source], errors="coerce")
+            if numeric.notna().any():
+                value = numeric.sum()
+                if value >= 0 and value == int(value):
+                    row[output] = int(value)
+        if not any(row[name] is not None for name in mapping.values()):
+            continue
+        items = context["byKickerSleeper"].setdefault(str(sid), [])
+        items[:] = [old for old in items if old.get("week") != int(week)]
+        items.append(row)
+        updated += 1
+    for items in context["byKickerSleeper"].values():
+        items.sort(key=lambda r: r["week"])
+    context["coverage"]["kickers"] = len(context["byKickerSleeper"])
+    context["coverage"]["kickerMappedWeeks"] = updated
+    context["coverage"]["kickerStatsStatus"] = (
+        "OBSERVADO: nflverse weekly player stats" if updated else
+        "NO DISPONIBLE: ningún kicker GSIS->Sleeper con estadísticas verificadas")
+    context["sources"]["kickingWeeklyStats"] = SOURCES["stats"]
+    return context
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-gzip", type=Path, required=True)
@@ -141,7 +197,11 @@ def main() -> None:
     pbp = pd.read_parquet(source, columns=cols)
     cross = pull(SOURCES["crosswalk"], args.cache_dir / "crosswalk.csv")
     identity, _, _ = load_identity(pd.read_csv(cross, dtype=str))
-    context = json_native(build_context(pbp, identity, through))
+    context = build_context(pbp, identity, through)
+    # NFLverse PBP 2026 lacks kicker player IDs: use player-week box statistics.
+    stats_file = pull(SOURCES["stats"], args.cache_dir / "stats.csv")
+    stats = pd.read_csv(stats_file, low_memory=False)
+    context = json_native(merge_weekly_kickers(context, stats, identity, through))
     if context["coverage"]["defenseTeams"] < 28:
         raise ValueError("Insufficient defensive team coverage")
     if not context["byKickerSleeper"]:
