@@ -9,6 +9,7 @@ on:
       - 'moneyball7_scout.py'
       - 'moneyball7_publish.py'
       - 'moneyball7_context.py'
+      - 'moneyball72_projection.py'
       - '.github/workflows/moneyball5.yml'
   schedule:
     # Lunes y martes, 07:20 Monterrey
@@ -94,6 +95,13 @@ jobs:
             --source-gzip data/_MONEYBALL_FEED_2026.json.gz \
             --output data/_MONEYBALL7_CONTEXT_2026.json.gz
 
+      - name: Calibrar baseline histórico y registrar procedencia de lesiones 7.2
+        continue-on-error: true
+        run: |
+          python moneyball72_projection.py \
+            --source-gzip data/_MONEYBALL_FEED_2026.json.gz \
+            --output data/_MONEYBALL72_PROJECTION_2026.json.gz
+
       - name: Publicar feed comprimido
         run: |
           git config user.name "github-actions[bot]"
@@ -102,6 +110,9 @@ jobs:
           git add data/_MONEYBALL_FEED_2026.json.gz data/_MONEYBALL7_SCOUT_2026.json.gz
           if test -s data/_MONEYBALL7_CONTEXT_2026.json.gz; then
             git add data/_MONEYBALL7_CONTEXT_2026.json.gz
+          fi
+          if test -s data/_MONEYBALL72_PROJECTION_2026.json.gz; then
+            git add data/_MONEYBALL72_PROJECTION_2026.json.gz
           fi
 
           if git diff --cached --quiet; then
