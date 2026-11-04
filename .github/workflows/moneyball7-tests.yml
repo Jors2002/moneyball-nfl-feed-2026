@@ -6,6 +6,8 @@ on:
       - 'moneyball7_scout.py'
       - 'moneyball7_publish.py'
       - 'moneyball7_context.py'
+      - 'moneyball72_projection.py'
+      - 'tests/test_moneyball72_projection.py'
       - 'tests/test_moneyball7_*.py'
       - '.github/workflows/moneyball7-tests.yml'
       - '.github/workflows/moneyball5.yml'
@@ -24,8 +26,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install -r requirements.txt
-      - run: python -m py_compile moneyball7_scout.py moneyball7_publish.py moneyball7_context.py
-      - run: python -m pytest -q tests/test_moneyball7_scout.py tests/test_moneyball7_publish.py tests/test_moneyball7_context.py tests/test_moneyball6_validate.py
+      - run: python -m py_compile moneyball7_scout.py moneyball7_publish.py moneyball7_context.py moneyball72_projection.py
+      - run: python -m pytest -q tests/test_moneyball7_scout.py tests/test_moneyball7_publish.py tests/test_moneyball7_context.py tests/test_moneyball72_projection.py tests/test_moneyball6_validate.py
       - name: Validate actual compressed feed and publish scouting artifact
         run: |
           python moneyball6_validate.py data/_MONEYBALL_FEED_2026.json.gz --max-age-hours 168
