@@ -47,8 +47,9 @@ def test_walking_is_strictly_past():
     f=fixture()
     diag=walk_forward(f["bySleeper"],8)
     assert diag["status"]=="EXPLORATORY_WALK_FORWARD"
-    assert diag["weeksTested"] == [4,5,6,7,8]
-    assert diag["examples"] == 5
+    assert diag["weeksTested"] == [8]
+    assert diag["examples"] == 1
+    assert diag["eligibility"] == "historical baseline >= 5 PPR"
 
 def test_injuries_no_false_freshness_and_source_time():
     f=build(fixture(),8)
@@ -80,3 +81,10 @@ def test_no_mutation():
     f=fixture();before=copy.deepcopy(f)
     build(f)
     assert f==before
+
+
+def test_zero_point_fringe_players_do_not_hide_real_error():
+    rows = [{"week": w, "ppr": 0.0} for w in range(1, 9)]
+    out = walk_forward({"111": rows, "112": rows}, 8)
+    assert out["examples"] == 0
+    assert out["mae"] is None
