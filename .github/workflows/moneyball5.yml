@@ -74,12 +74,18 @@ jobs:
           print("Fuentes:", feed.get("sources", {}))
           PY
 
+      - name: Calcular scouting Moneyball 7.0 desde el feed validado
+        run: |
+          python moneyball7_publish.py \
+            --input data/_MONEYBALL_FEED_2026.json.gz \
+            --output data/_MONEYBALL7_SCOUT_2026.json.gz
+
       - name: Publicar feed comprimido
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add data/_MONEYBALL_FEED_2026.json.gz
+          git add data/_MONEYBALL_FEED_2026.json.gz data/_MONEYBALL7_SCOUT_2026.json.gz
 
           if git diff --cached --quiet; then
             echo "No hay cambios para publicar."
