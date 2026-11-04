@@ -7,6 +7,7 @@ on:
       - 'moneyball7_publish.py'
       - 'tests/test_moneyball7_*.py'
       - '.github/workflows/moneyball7-tests.yml'
+      - '.github/workflows/moneyball5.yml'
   workflow_dispatch:
 
 permissions:
