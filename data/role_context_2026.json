@@ -1,0 +1,15 @@
+[
+  {
+    "kind": "TEAMMATES_RETURNED",
+    "season": 2026,
+    "team": "SEA",
+    "positions": ["RB"],
+    "eventWeek": 8,
+    "verified": true,
+    "publishedAt": "2026-11-02T23:48:24.878Z",
+    "modifiedAt": "2026-11-03T07:03:03.937Z",
+    "sourceUrl": "https://www.seahawks.com/news/jadarian-price-zach-charbonnet-active-as-expected-for-seahawks-week-8-game-vs-bears",
+    "officialHosts": ["www.seahawks.com"],
+    "fact": "Seattle confirmed Charbonnet and Price active for Week 8; this establishes competition returning, not a measured causal effect on Wilson."
+  }
+]

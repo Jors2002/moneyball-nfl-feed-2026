@@ -16,12 +16,16 @@ from moneyball8_league import write_private_report
 OFFENSE = {"QB", "RB", "WR", "TE"}
 
 
-def build(private_dir, forecast, ours, rival, give, receive, candidate_limit=200):
+def build(private_dir, forecast, ours, rival, give, receive, candidate_limit=200, role_feed=None):
     directory = Path(private_dir)
     rosters = json.loads((directory / "rosters.json").read_text())
     metadata = json.loads((directory / "players.json").read_text())
     league = json.loads((directory / "league.json").read_text())
     players = forecast["bySleeper"]
+    if role_feed is not None:
+        from moneyball8_role_pipeline import check_sidecar
+        check_sidecar(role_feed,forecast)
+    role_players=(role_feed or {}).get('bySleeper',{})
     teams = {r["roster_id"]: r for r in rosters}
     a, b = teams[ours], teams[rival]
     if give not in a["players"] or receive not in b["players"]:
@@ -34,7 +38,10 @@ def build(private_dir, forecast, ours, rival, give, receive, candidate_limit=200
     def rows(ids, overrides=None):
         return [{"id": sid, "positions": [metadata[sid]["position"]],
                  "projection": (overrides or {}).get(sid, players.get(sid, {}).get("projection")),
-                 "available": True} for sid in ids]
+                 "available": True,
+                 "bye":role_players.get(sid,{}).get('roleEvaluation',{}).get('status')=='BYE',
+                 "roleDecisionAllowed":role_players.get(sid,{}).get('roleEvaluation',{}).get('decisionAllowed') is True}
+                for sid in ids]
 
     def named(result):
         result = dict(result)
@@ -90,6 +97,7 @@ def build(private_dir, forecast, ours, rival, give, receive, candidate_limit=200
     waivers.sort(key=lambda w: w["best_drop"]["offensive_points_delta"] if w["best_drop"] else -float("inf"), reverse=True)
     return {"schemaVersion": 80, "generatedAt": datetime.now(timezone.utc).isoformat(),
             "forecastGeneratedAt": forecast["generatedAt"], "targetWeek": forecast["targetWeek"],
+            "roleEvidenceStatus":"MATCHED_SIDECAR" if role_feed else "MISSING_ROLE_EVIDENCE_BLOCKS_DECISIONS",
             "scope": "SEVEN_OFFENSIVE_STARTERS_ONLY", "league_scoring": forecast.get("scoring"),
             "complete_fantasy_lineup_verified": False, "championship_probability_delta": None,
             "assumptions": ["All modeled non-IR offensive players participate without restrictions: hypothetical, not medical evidence.",
@@ -119,10 +127,14 @@ def main():
     parser.add_argument("--give", required=True)
     parser.add_argument("--receive", required=True)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--role-feed",type=Path)
     args = parser.parse_args()
     with gzip.open(args.feed, "rt") as handle:
         forecast = json.load(handle)
-    report = build(args.private_dir, forecast, args.ours, args.rival, args.give, args.receive)
+    roles=None
+    if args.role_feed:
+        with gzip.open(args.role_feed,'rt') as handle:roles=json.load(handle)
+    report = build(args.private_dir, forecast, args.ours, args.rival, args.give, args.receive,role_feed=roles)
     write_private_report(args.output, report)
     print(json.dumps({"status": "PRIVATE_CONDITIONAL_CASE_WRITTEN", "targetWeek": report["targetWeek"],
                       "waiver_candidates": report["waivers"]["candidates_evaluated"]}))

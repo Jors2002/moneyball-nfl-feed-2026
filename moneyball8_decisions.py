@@ -59,6 +59,8 @@ def _optimize(players, locked_slots=None, slots=SLOTS, eligible_positions=ELIGIB
     for sid, p in records.items():
         if p.get("bye") or p.get("reserve") or p.get("available") is False:
             excluded.append(sid)
+        elif p.get('roleDecisionAllowed') is False:
+            missing.append({'id':sid,'reason':'ROLE_REVIEW_REQUIRED'})
         elif p.get("available") is not True or not _number(p.get("projection")):
             missing.append({"id": sid, "reason": "AVAILABILITY_UNKNOWN" if p.get("available") is not True else "PROJECTION_MISSING"})
     usable = {sid: p for sid, p in records.items() if sid not in excluded and not any(x["id"] == sid for x in missing)}

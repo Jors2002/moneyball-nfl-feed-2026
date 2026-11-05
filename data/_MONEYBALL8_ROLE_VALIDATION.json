@@ -1,0 +1,1095 @@
+{
+  "schemaVersion": 81,
+  "module": "ROLE_RETROSPECTIVE_AUDIT",
+  "positions": {
+    "QB": {
+      "development_2024_W9_18": {
+        "all": {
+          "pairedMAEDifference": {
+            "difference": 0.08840269462223183,
+            "lower95": -0.06790795832691693,
+            "upper95": 0.25576876278141436,
+            "weekClusters": 10,
+            "draws": 1000
+          },
+          "original": {
+            "n": 271,
+            "mae": 6.46188,
+            "rmse": 8.34512,
+            "bias": -1.19096,
+            "interval80_coverage": 0.8265682656826568,
+            "interval80_radius": 11.054043337536903
+          },
+          "candidate": {
+            "n": 271,
+            "mae": 6.55028,
+            "rmse": 8.29973,
+            "bias": -0.44457,
+            "interval80_coverage": 0.8081180811808119,
+            "interval80_radius": 10.880468604092218
+          }
+        },
+        "role_review": {
+          "pairedMAEDifference": {
+            "difference": 0.2107333257053785,
+            "lower95": -0.30342958354861904,
+            "upper95": 0.7226331855950848,
+            "weekClusters": 8,
+            "draws": 1000
+          },
+          "original": {
+            "n": 29,
+            "mae": 6.1361,
+            "rmse": 7.90902,
+            "bias": 0.99991,
+            "interval80_coverage": 0.7931034482758621,
+            "interval80_radius": 11.054043337536903
+          },
+          "candidate": {
+            "n": 29,
+            "mae": 6.34683,
+            "rmse": 7.80298,
+            "bias": -0.59898,
+            "interval80_coverage": 0.8275862068965517,
+            "interval80_radius": 10.880468604092218
+          }
+        },
+        "abrupt_loss": {
+          "pairedMAEDifference": null,
+          "original": {
+            "n": 2,
+            "mae": 14.4529,
+            "rmse": 14.45762,
+            "bias": 14.4529,
+            "interval80_coverage": 0.0,
+            "interval80_radius": 11.054043337536903
+          },
+          "candidate": {
+            "n": 2,
+            "mae": 12.29157,
+            "rmse": 12.3503,
+            "bias": 12.29157,
+            "interval80_coverage": 0.0,
+            "interval80_radius": 10.880468604092218
+          }
+        },
+        "utilization_increase": {
+          "pairedMAEDifference": null,
+          "original": {
+            "n": 2,
+            "mae": 7.44202,
+            "rmse": 9.87844,
+            "bias": -6.49615,
+            "interval80_coverage": 0.5,
+            "interval80_radius": 11.054043337536903
+          },
+          "candidate": {
+            "n": 2,
+            "mae": 7.73996,
+            "rmse": 9.25866,
+            "bias": -5.08092,
+            "interval80_coverage": 0.5,
+            "interval80_radius": 10.880468604092218
+          }
+        },
+        "no_review": {
+          "pairedMAEDifference": {
+            "difference": 0.07374323883127624,
+            "lower95": -0.08282977642027282,
+            "upper95": 0.25182724769351783,
+            "weekClusters": 10,
+            "draws": 1000
+          },
+          "original": {
+            "n": 242,
+            "mae": 6.50092,
+            "rmse": 8.39586,
+            "bias": -1.4535,
+            "interval80_coverage": 0.8305785123966942,
+            "interval80_radius": 11.054043337536903
+          },
+          "candidate": {
+            "n": 242,
+            "mae": 6.57466,
+            "rmse": 8.35728,
+            "bias": -0.42606,
+            "interval80_coverage": 0.8057851239669421,
+            "interval80_radius": 10.880468604092218
+          }
+        }
+      },
+      "frozen_retrospective_audit_2025": {
+        "all": {
+          "pairedMAEDifference": {
+            "difference": 0.10797972613339285,
+            "lower95": -0.001860004356654079,
+            "upper95": 0.21711238155912085,
+            "weekClusters": 15,
+            "draws": 1000
+          },
+          "original": {
+            "n": 404,
+            "mae": 6.49039,
+            "rmse": 8.13284,
+            "bias": -0.05859,
+            "interval80_coverage": 0.8267326732673267,
+            "interval80_radius": 11.054043337536903
+          },
+          "candidate": {
+            "n": 404,
+            "mae": 6.59837,
+            "rmse": 8.24692,
+            "bias": 0.39235,
+            "interval80_coverage": 0.8118811881188119,
+            "interval80_radius": 10.880468604092218
+          }
+        },
+        "role_review": {
+          "pairedMAEDifference": {
+            "difference": 0.14798407090458007,
+            "lower95": -0.030318598874284678,
+            "upper95": 0.40724666060566317,
+            "weekClusters": 15,
+            "draws": 1000
+          },
+          "original": {
+            "n": 93,
+            "mae": 6.48725,
+            "rmse": 8.02641,
+            "bias": -0.55717,
+            "interval80_coverage": 0.8172043010752689,
+            "interval80_radius": 11.054043337536903
+          },
+          "candidate": {
+            "n": 93,
+            "mae": 6.63523,
+            "rmse": 8.21732,
+            "bias": -1.53673,
+            "interval80_coverage": 0.8064516129032258,
+            "interval80_radius": 10.880468604092218
+          }
+        },
+        "abrupt_loss": {
+          "pairedMAEDifference": null,
+          "original": {
+            "n": 2,
+            "mae": 8.42794,
+            "rmse": 9.98976,
+            "bias": 5.36331,
+            "interval80_coverage": 0.5,
+            "interval80_radius": 11.054043337536903
+          },
+          "candidate": {
+            "n": 2,
+            "mae": 9.57869,
+            "rmse": 10.15071,
+            "bias": 3.35939,
+            "interval80_coverage": 0.5,
+            "interval80_radius": 10.880468604092218
+          }
+        },
+        "utilization_increase": {
+          "pairedMAEDifference": null,
+          "original": {
+            "n": 3,
+            "mae": 5.84797,
+            "rmse": 6.769,
+            "bias": -0.31109,
+            "interval80_coverage": 1.0,
+            "interval80_radius": 11.054043337536903
+          },
+          "candidate": {
+            "n": 3,
+            "mae": 6.76729,
+            "rmse": 7.50955,
+            "bias": 1.73746,
+            "interval80_coverage": 1.0,
+            "interval80_radius": 10.880468604092218
+          }
+        },
+        "no_review": {
+          "pairedMAEDifference": {
+            "difference": 0.0960170121021375,
+            "lower95": -0.021295852304421242,
+            "upper95": 0.21857893222126015,
+            "weekClusters": 14,
+            "draws": 1000
+          },
+          "original": {
+            "n": 311,
+            "mae": 6.49133,
+            "rmse": 8.1644,
+            "bias": 0.09051,
+            "interval80_coverage": 0.8295819935691319,
+            "interval80_radius": 11.054043337536903
+          },
+          "candidate": {
+            "n": 311,
+            "mae": 6.58734,
+            "rmse": 8.25575,
+            "bias": 0.96921,
+            "interval80_coverage": 0.8135048231511254,
+            "interval80_radius": 10.880468604092218
+          }
+        }
+      }
+    },
+    "RB": {
+      "development_2024_W9_18": {
+        "all": {
+          "pairedMAEDifference": {
+            "difference": 0.018906416799378278,
+            "lower95": -0.07787513214203193,
+            "upper95": 0.10067864389624696,
+            "weekClusters": 10,
+            "draws": 1000
+          },
+          "original": {
+            "n": 420,
+            "mae": 5.84554,
+            "rmse": 7.4603,
+            "bias": -0.06697,
+            "interval80_coverage": 0.7595238095238095,
+            "interval80_radius": 8.190247709821836
+          },
+          "candidate": {
+            "n": 420,
+            "mae": 5.86445,
+            "rmse": 7.43789,
+            "bias": 0.29912,
+            "interval80_coverage": 0.7571428571428571,
+            "interval80_radius": 8.379620038502495
+          }
+        },
+        "role_review": {
+          "pairedMAEDifference": {
+            "difference": -0.027699578314150486,
+            "lower95": -0.46764578001502777,
+            "upper95": 0.2658783765359475,
+            "weekClusters": 10,
+            "draws": 1000
+          },
+          "original": {
+            "n": 52,
+            "mae": 4.65704,
+            "rmse": 5.64592,
+            "bias": 1.37375,
+            "interval80_coverage": 0.8653846153846154,
+            "interval80_radius": 8.190247709821836
+          },
+          "candidate": {
+            "n": 52,
+            "mae": 4.62934,
+            "rmse": 5.62413,
+            "bias": 1.37846,
+            "interval80_coverage": 0.8461538461538461,
+            "interval80_radius": 8.379620038502495
+          }
+        },
+        "abrupt_loss": {
+          "pairedMAEDifference": {
+            "difference": -0.37052651729975644,
+            "lower95": -1.63442622130289,
+            "upper95": 1.39810996760955,
+            "weekClusters": 6,
+            "draws": 1000
+          },
+          "original": {
+            "n": 10,
+            "mae": 3.73485,
+            "rmse": 4.65601,
+            "bias": 1.26884,
+            "interval80_coverage": 1.0,
+            "interval80_radius": 8.190247709821836
+          },
+          "candidate": {
+            "n": 10,
+            "mae": 3.36433,
+            "rmse": 4.05329,
+            "bias": -0.42556,
+            "interval80_coverage": 1.0,
+            "interval80_radius": 8.379620038502495
+          }
+        },
+        "utilization_increase": {
+          "pairedMAEDifference": {
+            "difference": 0.6683616815538431,
+            "lower95": -0.057050488768755035,
+            "upper95": 1.5380601688298021,
+            "weekClusters": 7,
+            "draws": 1000
+          },
+          "original": {
+            "n": 13,
+            "mae": 4.50445,
+            "rmse": 5.38614,
+            "bias": 1.00363,
+            "interval80_coverage": 0.8461538461538461,
+            "interval80_radius": 8.190247709821836
+          },
+          "candidate": {
+            "n": 13,
+            "mae": 5.17281,
+            "rmse": 6.0984,
+            "bias": 2.23731,
+            "interval80_coverage": 0.7692307692307693,
+            "interval80_radius": 8.379620038502495
+          }
+        },
+        "no_review": {
+          "pairedMAEDifference": {
+            "difference": 0.025492046543681247,
+            "lower95": -0.08982608462564635,
+            "upper95": 0.1248502628513101,
+            "weekClusters": 10,
+            "draws": 1000
+          },
+          "original": {
+            "n": 368,
+            "mae": 6.01348,
+            "rmse": 7.6822,
+            "bias": -0.27055,
+            "interval80_coverage": 0.7445652173913043,
+            "interval80_radius": 8.190247709821836
+          },
+          "candidate": {
+            "n": 368,
+            "mae": 6.03897,
+            "rmse": 7.65963,
+            "bias": 0.1466,
+            "interval80_coverage": 0.7445652173913043,
+            "interval80_radius": 8.379620038502495
+          }
+        }
+      },
+      "frozen_retrospective_audit_2025": {
+        "all": {
+          "pairedMAEDifference": {
+            "difference": 0.05719583697109375,
+            "lower95": 0.006541094119947516,
+            "upper95": 0.1138602088776462,
+            "weekClusters": 15,
+            "draws": 1000
+          },
+          "original": {
+            "n": 674,
+            "mae": 5.9524,
+            "rmse": 7.91797,
+            "bias": -0.41694,
+            "interval80_coverage": 0.7729970326409495,
+            "interval80_radius": 8.190247709821836
+          },
+          "candidate": {
+            "n": 674,
+            "mae": 6.0096,
+            "rmse": 7.89605,
+            "bias": -0.02864,
+            "interval80_coverage": 0.7626112759643917,
+            "interval80_radius": 8.379620038502495
+          }
+        },
+        "role_review": {
+          "pairedMAEDifference": {
+            "difference": 0.09671524295400866,
+            "lower95": -0.09522691032602501,
+            "upper95": 0.19876912646148448,
+            "weekClusters": 15,
+            "draws": 1000
+          },
+          "original": {
+            "n": 134,
+            "mae": 5.1445,
+            "rmse": 6.922,
+            "bias": -0.81143,
+            "interval80_coverage": 0.8208955223880597,
+            "interval80_radius": 8.190247709821836
+          },
+          "candidate": {
+            "n": 134,
+            "mae": 5.24121,
+            "rmse": 6.96365,
+            "bias": -0.55855,
+            "interval80_coverage": 0.8059701492537313,
+            "interval80_radius": 8.379620038502495
+          }
+        },
+        "abrupt_loss": {
+          "pairedMAEDifference": {
+            "difference": -0.7694065890622911,
+            "lower95": -1.1953189380258984,
+            "upper95": -0.22633612682401427,
+            "weekClusters": 8,
+            "draws": 1000
+          },
+          "original": {
+            "n": 12,
+            "mae": 4.83291,
+            "rmse": 5.6609,
+            "bias": 3.766,
+            "interval80_coverage": 0.9166666666666666,
+            "interval80_radius": 8.190247709821836
+          },
+          "candidate": {
+            "n": 12,
+            "mae": 4.0635,
+            "rmse": 4.68722,
+            "bias": 2.37884,
+            "interval80_coverage": 1.0,
+            "interval80_radius": 8.379620038502495
+          }
+        },
+        "utilization_increase": {
+          "pairedMAEDifference": {
+            "difference": -0.5753132782433357,
+            "lower95": -1.2871048872542128,
+            "upper95": 0.4116288142905338,
+            "weekClusters": 9,
+            "draws": 1000
+          },
+          "original": {
+            "n": 18,
+            "mae": 6.30297,
+            "rmse": 8.17024,
+            "bias": -2.63531,
+            "interval80_coverage": 0.6666666666666666,
+            "interval80_radius": 8.190247709821836
+          },
+          "candidate": {
+            "n": 18,
+            "mae": 5.72765,
+            "rmse": 7.17529,
+            "bias": -0.83447,
+            "interval80_coverage": 0.7777777777777778,
+            "interval80_radius": 8.379620038502495
+          }
+        },
+        "no_review": {
+          "pairedMAEDifference": {
+            "difference": 0.04738916956051857,
+            "lower95": -0.0014422106403419387,
+            "upper95": 0.09602215742657956,
+            "weekClusters": 14,
+            "draws": 1000
+          },
+          "original": {
+            "n": 540,
+            "mae": 6.15289,
+            "rmse": 8.14628,
+            "bias": -0.31904,
+            "interval80_coverage": 0.7611111111111111,
+            "interval80_radius": 8.190247709821836
+          },
+          "candidate": {
+            "n": 540,
+            "mae": 6.20027,
+            "rmse": 8.11084,
+            "bias": 0.10285,
+            "interval80_coverage": 0.7518518518518519,
+            "interval80_radius": 8.379620038502495
+          }
+        }
+      }
+    },
+    "WR": {
+      "development_2024_W9_18": {
+        "all": {
+          "pairedMAEDifference": {
+            "difference": 0.01591754277137186,
+            "lower95": -0.0502620743527275,
+            "upper95": 0.08366247874763487,
+            "weekClusters": 10,
+            "draws": 1000
+          },
+          "original": {
+            "n": 731,
+            "mae": 5.78577,
+            "rmse": 7.65891,
+            "bias": -0.65466,
+            "interval80_coverage": 0.8303693570451436,
+            "interval80_radius": 9.178420598433375
+          },
+          "candidate": {
+            "n": 731,
+            "mae": 5.80169,
+            "rmse": 7.62065,
+            "bias": -0.43615,
+            "interval80_coverage": 0.826265389876881,
+            "interval80_radius": 9.155862626034672
+          }
+        },
+        "role_review": {
+          "pairedMAEDifference": {
+            "difference": 0.06498713316212565,
+            "lower95": -0.17914914876401744,
+            "upper95": 0.34460801522736983,
+            "weekClusters": 10,
+            "draws": 1000
+          },
+          "original": {
+            "n": 79,
+            "mae": 5.67316,
+            "rmse": 7.10437,
+            "bias": 0.1414,
+            "interval80_coverage": 0.8354430379746836,
+            "interval80_radius": 9.178420598433375
+          },
+          "candidate": {
+            "n": 79,
+            "mae": 5.73814,
+            "rmse": 7.02491,
+            "bias": 0.37963,
+            "interval80_coverage": 0.8227848101265823,
+            "interval80_radius": 9.155862626034672
+          }
+        },
+        "abrupt_loss": {
+          "pairedMAEDifference": {
+            "difference": -1.2542530646097128,
+            "lower95": -3.9287582634048674,
+            "upper95": 0.5374894733894441,
+            "weekClusters": 5,
+            "draws": 1000
+          },
+          "original": {
+            "n": 6,
+            "mae": 6.68213,
+            "rmse": 7.24189,
+            "bias": 4.05158,
+            "interval80_coverage": 0.8333333333333334,
+            "interval80_radius": 9.178420598433375
+          },
+          "candidate": {
+            "n": 6,
+            "mae": 5.42788,
+            "rmse": 6.03361,
+            "bias": 0.68343,
+            "interval80_coverage": 0.8333333333333334,
+            "interval80_radius": 9.155862626034672
+          }
+        },
+        "utilization_increase": {
+          "pairedMAEDifference": {
+            "difference": 0.5105209052102299,
+            "lower95": -0.20480270632065223,
+            "upper95": 1.2949586781882716,
+            "weekClusters": 7,
+            "draws": 1000
+          },
+          "original": {
+            "n": 9,
+            "mae": 7.66884,
+            "rmse": 10.84505,
+            "bias": -3.65364,
+            "interval80_coverage": 0.6666666666666666,
+            "interval80_radius": 9.178420598433375
+          },
+          "candidate": {
+            "n": 9,
+            "mae": 8.17936,
+            "rmse": 10.86119,
+            "bias": -2.40423,
+            "interval80_coverage": 0.7777777777777778,
+            "interval80_radius": 9.155862626034672
+          }
+        },
+        "no_review": {
+          "pairedMAEDifference": {
+            "difference": 0.009971994242430827,
+            "lower95": -0.048327350239577,
+            "upper95": 0.07126683416000651,
+            "weekClusters": 10,
+            "draws": 1000
+          },
+          "original": {
+            "n": 652,
+            "mae": 5.79941,
+            "rmse": 7.7234,
+            "bias": -0.75112,
+            "interval80_coverage": 0.8297546012269938,
+            "interval80_radius": 9.178420598433375
+          },
+          "candidate": {
+            "n": 652,
+            "mae": 5.80938,
+            "rmse": 7.6897,
+            "bias": -0.535,
+            "interval80_coverage": 0.8266871165644172,
+            "interval80_radius": 9.155862626034672
+          }
+        }
+      },
+      "frozen_retrospective_audit_2025": {
+        "all": {
+          "pairedMAEDifference": {
+            "difference": 0.0015952423554244544,
+            "lower95": -0.04511706613970592,
+            "upper95": 0.05062009992140023,
+            "weekClusters": 15,
+            "draws": 1000
+          },
+          "original": {
+            "n": 1007,
+            "mae": 5.67608,
+            "rmse": 7.19563,
+            "bias": 0.41476,
+            "interval80_coverage": 0.8252234359483615,
+            "interval80_radius": 9.178420598433375
+          },
+          "candidate": {
+            "n": 1007,
+            "mae": 5.67767,
+            "rmse": 7.18372,
+            "bias": 0.49288,
+            "interval80_coverage": 0.8133068520357497,
+            "interval80_radius": 9.155862626034672
+          }
+        },
+        "role_review": {
+          "pairedMAEDifference": {
+            "difference": 0.01897474374913892,
+            "lower95": -0.10092941366548529,
+            "upper95": 0.1060742444899419,
+            "weekClusters": 15,
+            "draws": 1000
+          },
+          "original": {
+            "n": 197,
+            "mae": 5.56944,
+            "rmse": 7.102,
+            "bias": 0.15204,
+            "interval80_coverage": 0.8274111675126904,
+            "interval80_radius": 9.178420598433375
+          },
+          "candidate": {
+            "n": 197,
+            "mae": 5.58842,
+            "rmse": 7.10471,
+            "bias": 0.22771,
+            "interval80_coverage": 0.8274111675126904,
+            "interval80_radius": 9.155862626034672
+          }
+        },
+        "abrupt_loss": {
+          "pairedMAEDifference": {
+            "difference": -1.0086093500429647,
+            "lower95": -2.186937388255535,
+            "upper95": 0.41148631013059034,
+            "weekClusters": 9,
+            "draws": 1000
+          },
+          "original": {
+            "n": 12,
+            "mae": 4.7087,
+            "rmse": 5.7718,
+            "bias": 1.66876,
+            "interval80_coverage": 0.9166666666666666,
+            "interval80_radius": 9.178420598433375
+          },
+          "candidate": {
+            "n": 12,
+            "mae": 3.7001,
+            "rmse": 5.36923,
+            "bias": -1.0516,
+            "interval80_coverage": 0.9166666666666666,
+            "interval80_radius": 9.155862626034672
+          }
+        },
+        "utilization_increase": {
+          "pairedMAEDifference": {
+            "difference": 0.3497640332136122,
+            "lower95": -0.11701355830125086,
+            "upper95": 0.8040409602091295,
+            "weekClusters": 10,
+            "draws": 1000
+          },
+          "original": {
+            "n": 13,
+            "mae": 2.68111,
+            "rmse": 3.58896,
+            "bias": 1.18628,
+            "interval80_coverage": 1.0,
+            "interval80_radius": 9.178420598433375
+          },
+          "candidate": {
+            "n": 13,
+            "mae": 3.03087,
+            "rmse": 3.91509,
+            "bias": 1.97868,
+            "interval80_coverage": 1.0,
+            "interval80_radius": 9.155862626034672
+          }
+        },
+        "no_review": {
+          "pairedMAEDifference": {
+            "difference": -0.002631624032923385,
+            "lower95": -0.05460057500767071,
+            "upper95": 0.04854207355657908,
+            "weekClusters": 14,
+            "draws": 1000
+          },
+          "original": {
+            "n": 810,
+            "mae": 5.70201,
+            "rmse": 7.21822,
+            "bias": 0.47865,
+            "interval80_coverage": 0.8246913580246914,
+            "interval80_radius": 9.178420598433375
+          },
+          "candidate": {
+            "n": 810,
+            "mae": 5.69938,
+            "rmse": 7.20281,
+            "bias": 0.55737,
+            "interval80_coverage": 0.8098765432098766,
+            "interval80_radius": 9.155862626034672
+          }
+        }
+      }
+    },
+    "TE": {
+      "development_2024_W9_18": {
+        "all": {
+          "pairedMAEDifference": {
+            "difference": -0.03887851095931676,
+            "lower95": -0.23437648134352942,
+            "upper95": 0.1576185342143075,
+            "weekClusters": 10,
+            "draws": 1000
+          },
+          "original": {
+            "n": 281,
+            "mae": 5.20815,
+            "rmse": 6.67894,
+            "bias": -0.01573,
+            "interval80_coverage": 0.7829181494661922,
+            "interval80_radius": 7.747208941448587
+          },
+          "candidate": {
+            "n": 281,
+            "mae": 5.16928,
+            "rmse": 6.63121,
+            "bias": 0.03532,
+            "interval80_coverage": 0.7900355871886121,
+            "interval80_radius": 7.937924530205446
+          }
+        },
+        "role_review": {
+          "pairedMAEDifference": {
+            "difference": 0.12754636927781188,
+            "lower95": -0.3743199014411493,
+            "upper95": 0.8900958707977682,
+            "weekClusters": 8,
+            "draws": 1000
+          },
+          "original": {
+            "n": 36,
+            "mae": 4.70778,
+            "rmse": 6.21441,
+            "bias": 0.76895,
+            "interval80_coverage": 0.8055555555555556,
+            "interval80_radius": 7.747208941448587
+          },
+          "candidate": {
+            "n": 36,
+            "mae": 4.83533,
+            "rmse": 6.48798,
+            "bias": -0.12952,
+            "interval80_coverage": 0.7777777777777778,
+            "interval80_radius": 7.937924530205446
+          }
+        },
+        "abrupt_loss": {
+          "pairedMAEDifference": {
+            "difference": -0.3804198334236635,
+            "lower95": -1.8329204109741475,
+            "upper95": 1.4229958240876943,
+            "weekClusters": 5,
+            "draws": 1000
+          },
+          "original": {
+            "n": 8,
+            "mae": 4.37617,
+            "rmse": 4.94102,
+            "bias": 3.21863,
+            "interval80_coverage": 1.0,
+            "interval80_radius": 7.747208941448587
+          },
+          "candidate": {
+            "n": 8,
+            "mae": 3.99575,
+            "rmse": 4.50549,
+            "bias": 1.17118,
+            "interval80_coverage": 1.0,
+            "interval80_radius": 7.937924530205446
+          }
+        },
+        "utilization_increase": {
+          "pairedMAEDifference": {
+            "difference": -0.16441927319116237,
+            "lower95": -0.7327947252892988,
+            "upper95": 0.5237898480473856,
+            "weekClusters": 5,
+            "draws": 1000
+          },
+          "original": {
+            "n": 6,
+            "mae": 3.20697,
+            "rmse": 3.59361,
+            "bias": 0.36336,
+            "interval80_coverage": 1.0,
+            "interval80_radius": 7.747208941448587
+          },
+          "candidate": {
+            "n": 6,
+            "mae": 3.04255,
+            "rmse": 3.31966,
+            "bias": 0.72474,
+            "interval80_coverage": 1.0,
+            "interval80_radius": 7.937924530205446
+          }
+        },
+        "no_review": {
+          "pairedMAEDifference": {
+            "difference": -0.06333277907579278,
+            "lower95": -0.2481649614975329,
+            "upper95": 0.12976166126810126,
+            "weekClusters": 10,
+            "draws": 1000
+          },
+          "original": {
+            "n": 245,
+            "mae": 5.28168,
+            "rmse": 6.7445,
+            "bias": -0.13103,
+            "interval80_coverage": 0.7795918367346939,
+            "interval80_radius": 7.747208941448587
+          },
+          "candidate": {
+            "n": 245,
+            "mae": 5.21835,
+            "rmse": 6.652,
+            "bias": 0.05954,
+            "interval80_coverage": 0.7918367346938775,
+            "interval80_radius": 7.937924530205446
+          }
+        }
+      },
+      "frozen_retrospective_audit_2025": {
+        "all": {
+          "pairedMAEDifference": {
+            "difference": -0.06424261044842612,
+            "lower95": -0.15636422699110608,
+            "upper95": 0.017672072369365636,
+            "weekClusters": 15,
+            "draws": 1000
+          },
+          "original": {
+            "n": 441,
+            "mae": 4.91399,
+            "rmse": 6.35826,
+            "bias": 0.14958,
+            "interval80_coverage": 0.8140589569160998,
+            "interval80_radius": 7.747208941448587
+          },
+          "candidate": {
+            "n": 441,
+            "mae": 4.84974,
+            "rmse": 6.28894,
+            "bias": 0.28064,
+            "interval80_coverage": 0.8208616780045351,
+            "interval80_radius": 7.937924530205446
+          }
+        },
+        "role_review": {
+          "pairedMAEDifference": {
+            "difference": 0.04887443924950436,
+            "lower95": -0.28496913339925367,
+            "upper95": 0.30880078919461756,
+            "weekClusters": 12,
+            "draws": 1000
+          },
+          "original": {
+            "n": 74,
+            "mae": 4.19025,
+            "rmse": 5.43584,
+            "bias": 0.11842,
+            "interval80_coverage": 0.8378378378378378,
+            "interval80_radius": 7.747208941448587
+          },
+          "candidate": {
+            "n": 74,
+            "mae": 4.23912,
+            "rmse": 5.54478,
+            "bias": -0.45447,
+            "interval80_coverage": 0.8513513513513513,
+            "interval80_radius": 7.937924530205446
+          }
+        },
+        "abrupt_loss": {
+          "pairedMAEDifference": {
+            "difference": -0.535642186251021,
+            "lower95": -1.9502225244883271,
+            "upper95": 0.8123989953195788,
+            "weekClusters": 6,
+            "draws": 1000
+          },
+          "original": {
+            "n": 8,
+            "mae": 5.82952,
+            "rmse": 7.15747,
+            "bias": -0.40309,
+            "interval80_coverage": 0.75,
+            "interval80_radius": 7.747208941448587
+          },
+          "candidate": {
+            "n": 8,
+            "mae": 5.29388,
+            "rmse": 7.28045,
+            "bias": -1.92304,
+            "interval80_coverage": 0.75,
+            "interval80_radius": 7.937924530205446
+          }
+        },
+        "utilization_increase": {
+          "pairedMAEDifference": null,
+          "original": {
+            "n": 4,
+            "mae": 5.2886,
+            "rmse": 7.9833,
+            "bias": -3.66324,
+            "interval80_coverage": 0.75,
+            "interval80_radius": 7.747208941448587
+          },
+          "candidate": {
+            "n": 4,
+            "mae": 5.08507,
+            "rmse": 6.81222,
+            "bias": -1.51503,
+            "interval80_coverage": 0.75,
+            "interval80_radius": 7.937924530205446
+          }
+        },
+        "no_review": {
+          "pairedMAEDifference": {
+            "difference": -0.08705095289433036,
+            "lower95": -0.1686273907258784,
+            "upper95": -0.00567754093550177,
+            "weekClusters": 14,
+            "draws": 1000
+          },
+          "original": {
+            "n": 367,
+            "mae": 5.05992,
+            "rmse": 6.52849,
+            "bias": 0.15586,
+            "interval80_coverage": 0.8092643051771117,
+            "interval80_radius": 7.747208941448587
+          },
+          "candidate": {
+            "n": 367,
+            "mae": 4.97287,
+            "rmse": 6.42856,
+            "bias": 0.42886,
+            "interval80_coverage": 0.8147138964577657,
+            "interval80_radius": 7.937924530205446
+          }
+        }
+      }
+    }
+  },
+  "policy": {
+    "version": "8.1.0",
+    "calibrationSeason": 2023,
+    "positions": {
+      "QB": {
+        "status": "CALIBRATED_ALERT_THRESHOLD",
+        "n": 465,
+        "drop": 0.8359999999999999,
+        "gain": 0.5532499999999995,
+        "gainBasis": "min(recent2) minus mean(previous2)",
+        "quantile": 0.95
+      },
+      "RB": {
+        "status": "CALIBRATED_ALERT_THRESHOLD",
+        "n": 1189,
+        "drop": 0.31999999999999995,
+        "gain": 0.23875000000000002,
+        "gainBasis": "min(recent2) minus mean(previous2)",
+        "quantile": 0.95
+      },
+      "WR": {
+        "status": "CALIBRATED_ALERT_THRESHOLD",
+        "n": 2158,
+        "drop": 0.42649999999999977,
+        "gain": 0.33499999999999996,
+        "gainBasis": "min(recent2) minus mean(previous2)",
+        "quantile": 0.95
+      },
+      "TE": {
+        "status": "CALIBRATED_ALERT_THRESHOLD",
+        "n": 1253,
+        "drop": 0.3,
+        "gain": 0.26749999999999996,
+        "gainBasis": "min(recent2) minus mean(previous2)",
+        "quantile": 0.95
+      }
+    },
+    "interpretation": "Empirical utilization-tail alert thresholds; NOT a calibrated causal classifier",
+    "adjustmentPromoted": false,
+    "adjustedProjection": null,
+    "calibrationSourceSha256": {
+      "snaps_2023": "303b61aa5c33ffda863f93a750fc14483f397f9187ad502b1ce71e9b516a64c0",
+      "identity_crosswalk": "17a2424e7321db221037ce65eb139079185f01bb5e8df13333d7abb21169a476"
+    }
+  },
+  "examples": 6944,
+  "zeroOffenseMissingFantasyOutcome": {
+    "2024": 190,
+    "2025": 145
+  },
+  "baselineEligibleZeroOffenseMissingOutcome": {
+    "2024": 1,
+    "2025": 1
+  },
+  "missingOutcomeCountScope": "First count all mapped QB/RB/WR/TE snap rows; second count only original baseline eligibility",
+  "alertPersistenceProxy": {
+    "alerts_with_next_snap_observed": 281,
+    "next_game_below_prior_share": 202,
+    "future_snap_unknown": 189,
+    "next_game_recovered_prior_share": 79
+  },
+  "candidate": {
+    "model": "expanding position-specific ridge, penalty30",
+    "features": [
+      "original",
+      "last_share",
+      "prior_share",
+      "share_delta",
+      "last_carries",
+      "last_targets"
+    ],
+    "promoted": false,
+    "adjustedProjection": null
+  },
+  "promotionGate": {
+    "status": "NOT_PROMOTED",
+    "reasons": [
+      "Verified zero-offense participants can have missing fantasy outcomes; complete-cohort performance is unestablished.",
+      "Source publication-time vintages and availability calibration are absent.",
+      "No independent future test of this new role-aware adjustment exists."
+    ]
+  },
+  "evaluationDesign": {
+    "thresholds": "2023 only; empirical 95th conditional tail",
+    "intervals": "2024 W1-8 residuals",
+    "development": "2024 W9-18",
+    "audit": "2025 fixed retrospective comparison; not a prospective trial",
+    "cohort": "Original8 opportunity forecasts with observed next PPR; same rows for both models",
+    "week9_2026": "Preserved prospective vintage; no outcome used in design"
+  },
+  "limitations": [
+    "Persistence proxy is not labeled tactical role truth; injury exits can recover.",
+    "No causal sensitivity/specificity claim without independently labeled role changes.",
+    "No fabricated zero fantasy outcomes and no participation probabilities."
+  ]
+}

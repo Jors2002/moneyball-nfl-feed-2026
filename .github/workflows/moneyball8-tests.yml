@@ -34,3 +34,12 @@ jobs:
               feed=json.load(f)
           print('NFL_FORECAST_CONTRACT_OK',validate_prediction(feed,feed['season'],feed['asOfWeek']))
           PY
+      - name: Verify role sidecar and immutable forecast vintage
+        run: |
+          python - <<'PYROLE'
+          import gzip,json
+          from moneyball8_role_pipeline import check_sidecar
+          with gzip.open('data/_MONEYBALL8_FORECAST_2026.json.gz','rt') as f: forecast=json.load(f)
+          with gzip.open('data/_MONEYBALL8_ROLE_2026.json.gz','rt') as f: roles=json.load(f)
+          print('ROLE_SIDECAR_CONTRACT_OK',check_sidecar(roles,forecast))
+          PYROLE

@@ -1,0 +1,45 @@
+{
+  "version": "8.1.0",
+  "calibrationSeason": 2023,
+  "positions": {
+    "QB": {
+      "status": "CALIBRATED_ALERT_THRESHOLD",
+      "n": 465,
+      "drop": 0.8359999999999999,
+      "gain": 0.5532499999999995,
+      "gainBasis": "min(recent2) minus mean(previous2)",
+      "quantile": 0.95
+    },
+    "RB": {
+      "status": "CALIBRATED_ALERT_THRESHOLD",
+      "n": 1189,
+      "drop": 0.31999999999999995,
+      "gain": 0.23875000000000002,
+      "gainBasis": "min(recent2) minus mean(previous2)",
+      "quantile": 0.95
+    },
+    "WR": {
+      "status": "CALIBRATED_ALERT_THRESHOLD",
+      "n": 2158,
+      "drop": 0.42649999999999977,
+      "gain": 0.33499999999999996,
+      "gainBasis": "min(recent2) minus mean(previous2)",
+      "quantile": 0.95
+    },
+    "TE": {
+      "status": "CALIBRATED_ALERT_THRESHOLD",
+      "n": 1253,
+      "drop": 0.3,
+      "gain": 0.26749999999999996,
+      "gainBasis": "min(recent2) minus mean(previous2)",
+      "quantile": 0.95
+    }
+  },
+  "interpretation": "Empirical utilization-tail alert thresholds; NOT a calibrated causal classifier",
+  "adjustmentPromoted": false,
+  "adjustedProjection": null,
+  "calibrationSourceSha256": {
+    "snaps_2023": "303b61aa5c33ffda863f93a750fc14483f397f9187ad502b1ce71e9b516a64c0",
+    "identity_crosswalk": "17a2424e7321db221037ce65eb139079185f01bb5e8df13333d7abb21169a476"
+  }
+}

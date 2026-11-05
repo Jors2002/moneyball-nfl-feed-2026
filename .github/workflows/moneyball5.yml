@@ -121,6 +121,14 @@ jobs:
             --output data/_MONEYBALL8_FORECAST_2026.json.gz \
             --pass-int-points -1
 
+      - name: Detectar cambios de rol sin alterar proyección original
+        continue-on-error: true
+        run: |
+          python moneyball8_role_pipeline.py \
+            --forecast data/_MONEYBALL8_FORECAST_2026.json.gz \
+            --source-gzip data/_MONEYBALL_FEED_2026.json.gz \
+            --output data/_MONEYBALL8_ROLE_2026.json.gz
+
       - name: Publicar feed comprimido
         run: |
           git config user.name "github-actions[bot]"
@@ -136,6 +144,9 @@ jobs:
 
           if test -s data/_MONEYBALL8_FORECAST_2026.json.gz; then
             git add data/_MONEYBALL8_FORECAST_2026.json.gz data/_MONEYBALL8_VALIDATION.json data/history/
+          fi
+          if test -s data/_MONEYBALL8_ROLE_2026.json.gz; then
+            git add data/_MONEYBALL8_ROLE_2026.json.gz data/role_history/
           fi
           if git diff --cached --quiet; then
             echo "No hay cambios para publicar."
