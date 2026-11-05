@@ -2,12 +2,102 @@
  * Requires the existing MB5 dashboard and helpers; creates no trigger.
  */
 const MB8 = Object.freeze({
-  version: '8.0.0', season: 2026, schema: 80,
+  version: '8.1.0', season: 2026, schema: 80,
   url: 'https://raw.githubusercontent.com/Jors2002/moneyball-nfl-feed-2026/main/data/_MONEYBALL8_FORECAST_2026.json.gz',
   manifest: '_MONEYBALL_MANIFIESTO_8.json', maxAgeHours: 72,
   maxGzipBytes: 2000000, maxTextChars: 15000000,
-  sheets: ['MB8_PROYECCIONES', 'MB8_CALIDAD']
+  sheets: ['MB8_PROYECCIONES', 'MB8_CALIDAD', 'MB8_ALERTAS_ROL']
 });
+
+function mb8ValidateRole_(role, feed) {
+  if(!role || role.schemaVersion !== 81 || role.season !== feed.season ||
+     role.asOfWeek !== feed.asOfWeek || role.targetWeek !== feed.targetWeek ||
+     !feed.predictionVintage || role.forecastVintage !== feed.predictionVintage || !role.bySleeper)
+    throw Error('8.1 rol: vintage/semana/esquema incompatible');
+  const generated = mb8Timestamp_(role.generatedAt);
+  if(Date.now() - generated > MB8.maxAgeHours*3600000) throw Error('8.1 evidencia de rol obsoleta');
+  if(Object.keys(role.bySleeper).length !== Object.keys(feed.bySleeper).length)
+    throw Error('8.1 cobertura de rol incompleta');
+  Object.keys(feed.bySleeper).forEach(id => {
+    const r=role.bySleeper[id], p=feed.bySleeper[id];
+    if(!r || r.originalProjection !== p.projection || r.adjustedProjection !== null ||
+       !r.roleEvaluation || typeof r.roleEvaluation.decisionAllowed !== 'boolean' ||
+       r.roleEvaluation.participationProbability !== null)
+      throw Error('8.1 rol inválido o ajuste no aprobado '+id);
+    if(r.decisionProjection !== (r.roleEvaluation.decisionAllowed ? p.projection : null))
+      throw Error('8.1 proyección no utilizable expuesta '+id);
+  });
+  return role;
+}
+
+function mb8RoleFetch_(feed) {
+  const path='data/_MONEYBALL8_ROLE_2026.json.gz';
+  const urls=[
+    ['gzip','https://raw.githubusercontent.com/Jors2002/moneyball-nfl-feed-2026/main/'+path],
+    ['api','https://api.github.com/repos/Jors2002/moneyball-nfl-feed-2026/contents/'+path+'?ref=main']
+  ];
+  const errors=[];
+  for(const [kind,url] of urls) {
+    try {
+      const response=UrlFetchApp.fetch(url,{muteHttpExceptions:true,followRedirects:true});
+      if(response.getResponseCode()!==200) throw Error('HTTP '+response.getResponseCode());
+      let blob=response.getBlob();
+      if(kind==='api') {
+        const api=JSON.parse(response.getContentText());
+        if(api.encoding!=='base64' || typeof api.content!=='string') throw Error('API base64 inválida');
+        blob=Utilities.newBlob(Utilities.base64Decode(api.content.replace(/\s/g,'')));
+      }
+      if(blob.getBytes().length>MB8.maxGzipBytes) throw Error('gzip de rol demasiado grande');
+      const text=Utilities.ungzip(blob).getDataAsString('UTF-8');
+      if(text.length>MB8.maxTextChars) throw Error('JSON de rol demasiado grande');
+      return mb8ValidateRole_(JSON.parse(text),feed);
+    } catch(error) {errors.push(String(error.message||error));}
+  }
+  throw Error('8.1 rol no disponible: '+errors.join(';'));
+}
+
+function mb8RoleRows_(feed, roles) {
+  return Object.keys(feed.bySleeper).filter(id => {
+    const role=roles && roles.bySleeper[id] && roles.bySleeper[id].roleEvaluation;
+    return !role || !role.decisionAllowed || role.status==='SUSTAINED_UTILIZATION_INCREASE';
+  }).map(id => {
+    const p=feed.bySleeper[id], r=roles && roles.bySleeper[id], role=r && r.roleEvaluation;
+    return [p.name,p.position,r && r.team || 'N/D',feed.targetWeek,
+      role && role.previous ? mb8UtilizationText_(role.previous,false) : 'N/D',
+      role && role.recent ? mb8UtilizationText_(role.recent,true) : 'N/D',
+      role ? role.status : 'ROL_NO_VERIFICADO',role ? role.quality : 'SIN_EVIDENCIA',
+      p.projection,'N/D: ajuste no validado',role ? role.cause : 'DESCONOCIDA',
+      role && role.action || 'Verificar rol; no usar automáticamente la referencia histórica',
+      role ? role.signals.join('; ') : 'Falta sidecar de rol del mismo vintage',
+      role ? role.causeEvidence.map(e=>e.sourceUrl+' | '+e.publishedAt).join('; ') : ''];
+  });
+}
+
+function mb8UtilizationText_(metrics,recent) {
+  const share=metrics[recent ? 'snapShareLatest' : 'snapShareMedian3'];
+  const show=k=>mb8Finite_(metrics[k]) ? Number(metrics[k].toFixed(2)) : 'N/D';
+  return (recent ? 'Snaps último: ' : 'Snaps mediana 3: ')+
+    (mb8Finite_(share) ? (share*100).toFixed(1)+'%' : 'N/D')+
+    '; acarreos '+show('carries')+'; targets '+show('targets')+
+    '; rutas '+show('routes')+'; acarreos ZR '+show('redzoneCarries');
+}
+
+function mb8RoleQualityRows_(roles) {
+  const summary=roles && roles.validationSummary, rows=[];
+  if(!summary)return [['Rol: comparación numérica','N/D; no presuponer mejora de precisión']];
+  rows.push(['Rol: interpretación de métricas',summary.label+'; ajuste NO promovido']);
+  rows.push(['Rol: ceros ofensivos sin resultado PPR verificable',JSON.stringify(summary.zeroOffenseMissingFantasyOutcome)]);
+  rows.push(['Rol: faltantes que cumplían elegibilidad baseline',JSON.stringify(summary.baselineEligibleZeroOffenseMissingOutcome||{})]);
+  Object.keys(summary.positions||{}).sort().forEach(pos=>{
+    const all=summary.positions[pos].all,changed=summary.positions[pos].abrupt_loss;
+    ['original','candidate'].forEach(model=>{
+      ['n','mae','bias','interval80_coverage'].forEach(k=>rows.push([
+        'Rol '+pos+' '+model+' '+k,all[model][k]===null ? 'N/D' : all[model][k]]));
+      ['n','mae'].forEach(k=>rows.push(['Rol '+pos+' pérdida abrupta '+model+' '+k,changed[model][k]]));
+    });
+  });
+  return rows;
+}
 
 function mb8Finite_(value) {
   return typeof value === 'number' && Number.isFinite(value);
@@ -110,7 +200,7 @@ function mb8Fetch_(week) {
 }
 
 function mb8RestoreSheets_(ss, previous) {
-  if(!Array.isArray(previous) || previous.length !== MB8.sheets.length ||
+  if(!Array.isArray(previous) || ![2,MB8.sheets.length].includes(previous.length) ||
      previous.some((prior,index) => prior.name !== MB8.sheets[index] ||
        typeof prior.existed !== 'boolean' || (prior.existed && !Array.isArray(prior.values))))
     throw Error('8.0 checkpoint inválido; revisar publicación antes de continuar');
@@ -198,11 +288,13 @@ function mb8Publish_(ss, checked, folder) {
   });
   const rows = Object.keys(feed.bySleeper).map(id => {
     const p = feed.bySleeper[id];
+    const role=checked.roles && checked.roles.bySleeper[id].roleEvaluation;
     return [id, p.name || '', p.position, feed.targetWeek,
       p.projection === null ? 'N/D' : p.projection, p.interval80.lower === null ? 'N/D' : p.interval80.lower,
       p.interval80.upper === null ? 'N/D' : p.interval80.upper, p.model || 'N/D',
       p.priorGames === undefined ? 'N/D' : p.priorGames,
-      p.quality || 'CONDICIONAL_A_PARTICIPAR', feed.generatedAt,
+      role ? (role.decisionAllowed ? role.status : 'REVISAR_ROL: '+role.status) : 'ROL_NO_VERIFICADO', feed.generatedAt,
+      role && !role.decisionAllowed ? 'Referencia histórica NO UTILIZABLE automáticamente: '+role.signals.join('; ') :
       'Sin ajuste de lesión, rival ni probabilidad de participar; K/DEF no modelados'];
   });
   const metrics = feed.validation || {};
@@ -216,16 +308,31 @@ function mb8Publish_(ss, checked, folder) {
     ['K/DEF', 'Sin proyección 8.0; conservar contexto 7.1'],
     ['Campeonato', 'NO CALIBRADO; no publicar porcentajes'],
     ['Operaciones Sleeper', 'NINGUNA'], ['Última publicación UTC', new Date().toISOString()]
-  ].concat(mb8QualityRows_(metrics));
+  ].concat(mb8QualityRows_(metrics)).concat([
+    ['Módulo rol',checked.roles ? 'VERIFICADO_TECNICAMENTE_8.1' : 'ROL_NO_VERIFICADO: no usar automáticamente'],
+    ['Rol: fecha evidencia',checked.roles ? checked.roles.generatedAt : 'N/D'],
+    ['Rol: conteos',checked.roles ? JSON.stringify((checked.roles.quality||{}).statusCounts||{}) : 'N/D'],
+    ['Rol: ajuste predictivo','NO PROMOVIDO; proyección original y vintage se conservan'],
+    ['Rol: validación','Comparación retrospectiva 2024/2025; no prueba prospectiva ni causas etiquetadas'],
+    ['Rol: disponibilidad','No hay modelo validado de probabilidad de participar'],
+    ['Rol: umbrales','Colas empíricas por posición calibradas sólo en 2023; cero ofensivo requiere evidencia de participación'],
+    ['Rol: cobertura','BYE, inactivo, falta de cobertura, lesión y cambio de equipo no equivalen a pérdida táctica']
+  ]).concat(mb8RoleQualityRows_(checked.roles));
   const manifest = {version:MB8.version, stage:'PENDING', sourceAt:checked.sourceAt,
     generatedAt:feed.generatedAt, targetWeek:feed.targetWeek, dashboardId:ss.getId(),
-    previous:previous};
+    previous:previous, roleVerified:!!checked.roles,
+    roleVintage:checked.roles ? checked.roles.forecastVintage : null};
   mb42SaveFile_(folder, MB8.manifest, manifest);
   try {
     mb5WriteSheet_(ss, MB8.sheets[0],
       ['Sleeper ID','Jugador','Posición','Semana','PPR central','Límite inferior','Límite superior',
        'Modelo','Juegos previos','Estado','Generado UTC','Limitación'], rows);
     mb5WriteSheet_(ss, MB8.sheets[1], ['Control','Resultado'], quality);
+    mb5WriteSheet_(ss, MB8.sheets[2],
+      ['Jugador','Posición','Equipo','Semana','Utilización anterior','Utilización reciente',
+       'Cambio detectado','Calidad de evidencia','Proyección original','Proyección ajustada',
+       'Causa verificada o desconocida','Acción sugerida','Señales observadas','Fuente/fecha de contexto'],
+      mb8RoleRows_(feed,checked.roles));
     SpreadsheetApp.flush();
     const header = ss.getSheetByName(MB8.sheets[0]).getRange(1,1).getValue();
     if(header !== 'Sleeper ID') throw Error('8.0 readback de encabezado falló');
@@ -249,7 +356,10 @@ function mb8Run_(folder, week) {
   if(!dashboardId) throw Error('8.0 requiere dashboard existente; ejecutar actualizarMoneyball');
   const ss = SpreadsheetApp.openById(dashboardId);
   mb8Recover_(folder, ss);
-  return mb8Publish_(ss, mb8Fetch_(week), folder);
+  const checked=mb8Fetch_(week);
+  try {checked.roles=mb8RoleFetch_(checked.data);}
+  catch(error) {Logger.log(error.message+'; todas las referencias se marcan rol no verificado');}
+  return mb8Publish_(ss, checked, folder);
 }
 
 /** Manual refresh or existing scheduler entry. Never installs another trigger. */
@@ -265,6 +375,7 @@ function actualizarMoneyball8() {
 function verificarMoneyball8() {
   const manifest = mb42ReadFile_(mbFolder_(), MB8.manifest);
   if(!manifest || manifest.stage !== 'COMPLETED') throw Error('8.0 sin publicación completa');
+  if(!manifest.roleVerified) throw Error('8.1 rol sin verificación; no certificar integración completa');
   mb8Timestamp_(manifest.publishedAt);
   if(Date.now() - Date.parse(manifest.sourceAt) > MB8.maxAgeHours * 3600000)
     throw Error('8.0 última publicación obsoleta');
@@ -278,7 +389,9 @@ function verificarMoneyball8() {
 
 function probarFuenteRealMoneyball8() {
   const nfl = mbGet_('/state/nfl'), checked = mb8Fetch_(Number(nfl.week || nfl.leg));
+  const roles=mb8RoleFetch_(checked.data);
   Logger.log('8.0 FUENTE ' + checked.status + ' / S' + checked.data.targetWeek);
+  Logger.log('8.1 ROL VERIFICADO_TECNICAMENTE: '+Object.keys(roles.bySleeper).length+' jugadores; ajuste NO promovido');
 }
 
 function probarMoneyball8() {

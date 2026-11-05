@@ -134,4 +134,52 @@ check('no new trigger and no Sleeper mutation',()=>{
   assert.equal(/ScriptApp\.|\.newTrigger\(/.test(code),false);
   assert.equal(/method\s*:\s*['"](?:post|put|delete|patch)/i.test(code),false);
 });
+function roleFixture(feed) {
+  feed.predictionVintage='vintage-test';
+  return {schemaVersion:81,season:2026,asOfWeek:8,targetWeek:9,forecastVintage:'vintage-test',
+    generatedAt:new Date().toISOString(),bySleeper:{'123':{name:'Test',position:'RB',team:'SEA',
+      originalProjection:12,adjustedProjection:null,decisionProjection:null,
+      roleEvaluation:{status:'ABRUPT_PARTICIPATION_LOSS',quality:'OBSERVED_SNAPS',decisionAllowed:false,
+        participationProbability:null,cause:'UNKNOWN',signals:['Explicit observed zero'],causeEvidence:[]}}}};
+}
+check('role sidecar preserves original point and vetoes unsafe use',()=>{
+  context.f=fixture();context.r=roleFixture(context.f);
+  assert.equal(run('mb8ValidateRole_(r,f)').bySleeper['123'].originalProjection,12);
+  const rows=run('mb8RoleRows_(f,r)');assert.equal(rows[0][8],12);assert.match(rows[0][9],/no validado/);
+});
+check('role wrong vintage rejects matching player names',()=>{
+  context.f=fixture();context.r=roleFixture(context.f);context.r.forecastVintage='different';
+  assert.throws(()=>run('mb8ValidateRole_(r,f)'));
+});
+check('unvalidated point haircut and participation probabilities rejected',()=>{
+  context.f=fixture();context.r=roleFixture(context.f);context.r.bySleeper['123'].adjustedProjection=0;
+  assert.throws(()=>run('mb8ValidateRole_(r,f)'));
+  context.r=roleFixture(context.f);context.r.bySleeper['123'].roleEvaluation.participationProbability=.5;
+  assert.throws(()=>run('mb8ValidateRole_(r,f)'));
+});
+check('review-required positive decision points cannot leak',()=>{
+  context.f=fixture();context.r=roleFixture(context.f);context.r.bySleeper['123'].decisionProjection=12;
+  assert.throws(()=>run('mb8ValidateRole_(r,f)'));
+});
+check('missing role marks references unavailable instead of clear',()=>{
+  const h=harness(false);run('mb8Publish_(ss,checked,folder)');
+  assert.equal(h.sheets.MB8_PROYECCIONES.values[1][9],'ROL_NO_VERIFICADO');
+  assert.equal(h.sheets.MB8_ALERTAS_ROL.values[1][6],'ROL_NO_VERIFICADO');
+  assert.equal(h.manifests.at(-1).roleVerified,false);
+});
+check('role tab failure restores prior two tabs',()=>{
+  const h=harness(false),write=context.mb5WriteSheet_;
+  context.mb5WriteSheet_=(ss,name,head,rows)=>{if(name==='MB8_ALERTAS_ROL')throw Error('role write failure');write(ss,name,head,rows);};
+  assert.throws(()=>run('mb8Publish_(ss,checked,folder)'));
+  assert.equal(h.sheets.MB8_PROYECCIONES.values[0][0],'old');
+  assert.equal(h.sheets.MB8_CALIDAD,undefined);
+  assert.equal(h.sheets.LINEUP.values[0][0],'DO NOT CHANGE');
+});
+check('complete role publication is recorded separately from predictive validity',()=>{
+  const h=harness(false);context.checked.data.predictionVintage='vintage-test';
+  context.checked.roles=roleFixture(context.checked.data);
+  const m=run('mb8Publish_(ss,checked,folder)');
+  assert.equal(m.roleVerified,true);assert.equal(m.stage,'COMPLETED');
+  assert.match(h.sheets.MB8_PROYECCIONES.values[1][9],/REVISAR_ROL/);
+});
 console.log('MONEYBALL8_APPS_TESTS_OK '+tests);

@@ -36,3 +36,8 @@ inspect the manifest after a hard timeout before trusting visible tabs.
 The feed does not model K/DST, current injury availability or championship odds.
 Published PPR projections and 80% intervals are conditional on recorded games;
 technical validation does not demonstrate interval calibration or predictive edge.
+
+
+### Role extension 8.1
+
+The complete build now also writes MB8_ALERTAS_ROL and verifies the role sidecar against the exact forecast vintage. `probarFuenteRealMoneyball8` verifies both sources, and `verificarMoneyball8` refuses to certify installation without verified role publication. Missing role evidence leaves raw points as reference only, visibly marked for review. The same four installation functions apply; no new trigger or reinstall. Legacy two-tab8.0 recovery checkpoints remain readable.

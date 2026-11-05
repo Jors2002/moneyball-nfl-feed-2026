@@ -77,7 +77,8 @@ def pull(url: str, dest: Path, hours: float = 6) -> Path:
 # Proyección de columnas antes de cargar Parquet: ahorro sustancial de RAM para
 # play-by-play (contiene cientos de columnas que Moneyball no necesita).
 PARQUET_FIELDS = {
-    "snaps": ["pfr_player_id","season","week","offense_snaps","offense_pct","game_type"],
+    "snaps": ["pfr_player_id","season","week","offense_snaps","offense_pct","game_type",
+              "team","game_id","st_snaps","defense_snaps"],
     "pbp": ["season","season_type","week","game_id","play_id","posteam",
             "rush_attempt","pass_attempt","yardline_100","rusher_player_id",
             "receiver_player_id","qb_kneel","down","qtr",
@@ -244,7 +245,17 @@ def build_snap_index(snaps: pd.DataFrame | None,pfr_to_sid: dict[str,str],throug
         pcts=[clean_rate(x) for x in g.offense_pct]
         pcts=[x for x in pcts if x is not None]
         # Un jugador tradeado no tiene share único sin snap totals por equipo.
-        out[(str(sid),int(w))]={"snaps":nint(snaps_num),"snapShare":pcts[0] if len(g)==1 and len(pcts)==1 else None}
+        share=pcts[0] if len(g)==1 and len(pcts)==1 else None
+        single=len(g)==1
+        participation=any(pd.to_numeric(g[col],errors='coerce').gt(0).any()
+                          for col in ('offense_snaps','st_snaps','defense_snaps') if col in g)
+        out[(str(sid),int(w))]={"snaps":nint(snaps_num),"snapShare":share,
+            "snapObserved":single and share is not None and nint(snaps_num) is not None,
+            "snapSource":SOURCES['snaps'],
+            "snapTeam":str(g.iloc[0]['team']) if single and 'team' in g else None,
+            "snapGameId":str(g.iloc[0]['game_id']) if single and 'game_id' in g else None,
+            "specialTeamsSnaps":nint(pd.to_numeric(g.st_snaps,errors='coerce').sum(min_count=1)) if 'st_snaps' in g else None,
+            "participationEvidence":"POSITIVE_SNAP_IN_ANY_PHASE" if participation else "UNKNOWN"}
     return out
 
 

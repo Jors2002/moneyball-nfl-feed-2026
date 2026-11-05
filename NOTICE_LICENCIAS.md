@@ -16,3 +16,7 @@ Los modelos 8.0 usan estadísticas semanales `stats_player` de nflverse, tempora
 El repositorio DynastyProcess declara GNU GPL v3. El crosswalk se usa solo para resolver identidad sin redistribuir el CSV completo: https://github.com/dynastyprocess/data/blob/master/LICENSE . El lector oficial de Chiefs preserva hechos mínimos y la URL; no redistribuye artículos/HTML y no implica una licencia general de su contenido. Sleeper se consulta solo en privado y en lectura: https://docs.sleeper.com/ .
 
 Las fuentes históricas son versiones revisadas, no un archivo de lo conocido antes de cada kickoff. La descarga no demuestra fecha de evento ni permiso de extraer rutas de un proveedor premium.
+
+## Role detection 8.1
+
+NFLverse/PFR snap counts2023–2026, NFLverse weekly player statistics and nfldata game schedules retain existing attribution and CC-BY4.0 terms of the nflverse releases. No full official article is redistributed: the Seattle context file preserves minimal facts, source URL and source timestamps. No premium route or tracking data is fabricated. Historical source hashes identify revised snapshots, not publication-time archives.

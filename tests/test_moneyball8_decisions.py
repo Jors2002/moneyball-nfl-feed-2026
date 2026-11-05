@@ -211,15 +211,28 @@ def test_private_case_study_missing_rival_forecast_is_not_filled_with_zero(tmp_p
     data = a + b + [player("free", "WR", 30)]
     metadata = {p["id"]: {"position": p["positions"][0], "full_name": p["id"], "injury_status": None} for p in data}
     forecast = {"generatedAt": "2026-11-04T23:00:00Z", "targetWeek": 9,
+                "asOfWeek":8,"predictionVintage":"synthetic-vintage",
                 "bySleeper": {p["id"]: {"position": p["positions"][0], "projection": p["projection"]} for p in data if p["id"] != "b2"}}
     for name, value in {"rosters": [{"roster_id": 1, "players": [p["id"] for p in a]},
                                      {"roster_id": 2, "players": [p["id"] for p in b]}],
                         "players": metadata, "league": {"status": "in_season"}}.items():
         (tmp_path / (name + ".json")).write_text(json.dumps(value))
-    result = build(tmp_path, forecast, 1, 2, "a1", "b1")
+    roles={'schemaVersion':81,'bySleeper':{sid:{'originalProjection':p['projection'],
+        'adjustedProjection':None,'decisionProjection':p['projection'],'roleEvaluation':{'decisionAllowed':True}}
+        for sid,p in forecast['bySleeper'].items()},'targetWeek':9,'asOfWeek':8,'forecastVintage':'synthetic-vintage'}
+    result = build(tmp_path, forecast, 1, 2, "a1", "b1",role_feed=roles)
     assert result["trade"]["rival"]["status"] == "INSUFFICIENT_DATA"
     assert result["trade"]["rival"]["offensive_points_delta"] is None
     assert result["trade"]["rival_missing_forecasts"] == ["b2"]
     assert result["complete_fantasy_lineup_verified"] is False
     assert result["waivers"]["candidates_evaluated"] == 1
     assert result["waivers"]["ranked_conditional_scenarios"][0]["add"] == "free"
+    blocked=build(tmp_path,forecast,1,2,'a1','b1')
+    assert blocked['trade']['ours']['offensive_points_delta'] is None
+    assert blocked['roleEvidenceStatus']=='MISSING_ROLE_EVIDENCE_BLOCKS_DECISIONS'
+
+def test_role_warning_blocks_even_an_attractive_numeric_projection():
+    rows=roster()+[{**player('wilson','RB',50),'roleDecisionAllowed':False}]
+    out=optimize_lineup(rows)
+    assert out['status']=='INSUFFICIENT_DATA' and out['total'] is None
+    assert {'id':'wilson','reason':'ROLE_REVIEW_REQUIRED'} in out['missing']
