@@ -1,7 +1,7 @@
 {
   "schemaVersion": 80,
   "module": "position_ppr_forecast_validation",
-  "generatedAt": "2026-11-07T08:57:00.924547+00:00",
+  "generatedAt": "2026-11-08T18:52:20.965764+00:00",
   "scoring": {
     "basis": "nflverse fantasy_points_ppr",
     "source_pass_int_points": -2,
