@@ -11,6 +11,7 @@ on:
       - 'moneyball7_context.py'
       - 'moneyball72_projection.py'
       - 'moneyball8_*.py'
+      - 'moneyball82_*.py'
       - '.github/workflows/moneyball5.yml'
   schedule:
     # Lunes y martes, 07:20 Monterrey
@@ -51,6 +52,9 @@ jobs:
 
       - name: Probar todos los módulos antes de actualizar datos
         run: python -m pytest -q
+
+      - name: Validar control de decisiones 8.2 sin datos privados
+        run: node tests/test_moneyball82_apps_script.js
 
       - name: Reusar fuentes históricas 8.0
         uses: actions/cache@v4
