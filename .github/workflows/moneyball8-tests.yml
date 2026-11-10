@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'moneyball8_*.py'
+      - 'moneyball82_*.py'
       - 'moneyball5_etl.py'
       - 'moneyball6_validate.py'
       - 'tests/**'
@@ -25,6 +26,7 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - run: python -m pytest -q
       - run: node tests/test_moneyball8_apps_script.js
+      - run: node tests/test_moneyball82_apps_script.js
       - name: Verify actual published NFL forecast contract
         run: |
           python - <<'PY'
