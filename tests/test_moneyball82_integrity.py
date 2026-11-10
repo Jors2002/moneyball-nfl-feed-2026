@@ -67,30 +67,49 @@ class DecisionIntegrityTests(unittest.TestCase):
         p["drops"] = ["DST_PLAYOFF"]
         out = review(fixture(), p, now=NOW)
         self.assertEqual(out["state"], "CONDICIONADA")
-        self.assertIn("PROTECTED_ASSET_REQUIRES_REVERSAL", out["missing"])
+        self.assertIn("HISTORICAL_DECISION_NEEDS_NEW_EVIDENCE_AND_COST", out["missing"])
         self.assertEqual(out["conflicts"][0]["id"], "PLAYOFF_D_STASH")
 
-    def test_new_evidence_unapproved_still_blocked(self):
+    def test_incomplete_new_evidence_still_conditional(self):
         p = proposal()
         p["drops"] = ["DST_PLAYOFF"]
         p["reversal"] = dict(before="stash", new_evidence="new role", change="drop",
-                             cost="playoff risk", source="dated official", user_authorized=False)
+                             source="dated official", user_authorized=False)
         self.assertEqual(review(fixture(), p, now=NOW)["state"], "CONDICIONADA")
 
-    def test_specific_signed_reversal_can_pass_review_only(self):
+    def test_new_evidence_can_reverse_strategy_without_permission_to_recommend(self):
         p = proposal()
         p["drops"] = ["DST_PLAYOFF"]
         p["reversal"] = dict(before="stash", new_evidence="verified replacement",
                              change="drop after audit", cost="playoff DST hedge lost",
-                             source="dated official", user_authorized=True)
+                             source="dated official", user_authorized=False)
         o = review(fixture(), p, now=NOW)
         self.assertEqual(o["state"], "APROBADA")
         self.assertFalse(o["executed"])
+        self.assertFalse(o["execution_authorized"])
+        self.assertTrue(o["recommendation_allowed"])
 
-    def test_missing_authorization_never_approved(self):
+    def test_recommendations_do_not_require_execution_authorization(self):
         p = proposal()
         p["user_authorized"] = False
-        self.assertIn("USER_AUTHORIZATION", review(fixture(), p, now=NOW)["missing"])
+        out = review(fixture(), p, now=NOW)
+        self.assertEqual(out["state"], "APROBADA")
+        self.assertFalse(out["execution_authorized"])
+
+    def test_any_active_asset_strategy_is_reconsidered(self):
+        reg = fixture()
+        reg["decisions"].append({
+            "id": "QB_BACKUP_PLAN", "status": "ACTIVA", "kind": "ROSTER_STRATEGY",
+            "asset": "BACKUP_QB", "why": "Injury hedge",
+            "source": "prior analysis", "decided_at": "2026-11-09"
+        })
+        p = proposal()
+        p["drops"] = ["BACKUP_QB"]
+        self.assertEqual(review(reg, p, now=NOW)["state"], "CONDICIONADA")
+        p["reversal"] = dict(before="Keep handcuff", new_evidence="Healthy starter",
+                             change="Drop for stronger marginal asset",
+                             cost="Loss of insurance", source="dated medical news")
+        self.assertEqual(review(reg, p, now=NOW)["state"], "APROBADA")
 
     def test_missing_horizon_and_scoring_fail_closed(self):
         p = proposal()
