@@ -95,11 +95,13 @@ def review(reg, proposal, *, now=None, max_age_hours=72):
         raise IntegrityError("Conflicting player movements")
     missing = []
     checks = proposal.get("checks", {})
+    if not isinstance(checks, dict):
+        checks = {}
     for check in REQUIRED:
         if not isinstance(checks, dict) or checks.get(check) is not True:
             missing.append("CHECK_" + check.upper())
     # Exact league points must use reconciled scoring; generic PPR is insufficient.
-    if proposal.get("scoring_source") != "SLEEPER_BR R":
+    if proposal.get("scoring_source") != "SLEEPER_BRR":
         missing.append("LEAGUE_SCORING_SOURCE")
     timestamp = _dated(proposal.get("snapshot_at"))
     if timestamp is None or timestamp > now or now - timestamp > timedelta(hours=max_age_hours):
