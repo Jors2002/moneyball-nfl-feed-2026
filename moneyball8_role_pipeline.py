@@ -45,6 +45,60 @@ def apply_verified_byes(histories,games,season,through):
                 'team':team,'gameStatus':'BYE','snapObserved':False,'snaps':None,'snapShare':None})
     return histories,'FULL_272_GAME_SCHEDULE_VALIDATED'
 
+def verified_target_schedule(games, season, target_week):
+    """Require a full NFL regular-season schedule; never infer target BYE from prior snaps."""
+    data = games[(games.season == season) & (games.game_type == 'REG')]
+    if len(data) != 272 or data.game_id.duplicated().any():
+        raise ValueError('TARGET_SCHEDULE_NOT_FULL_272')
+    aliases = {'JAC': 'JAX', 'LA': 'LAR', 'WSH': 'WAS'}
+    norm = lambda t: aliases.get(str(t), str(t))
+    allteams = {norm(t) for t in list(data.home_team) + list(data.away_team)}
+    if len(allteams) != 32:
+        raise ValueError('TARGET_SCHEDULE_NOT_32_TEAMS')
+    for w, weekly in data.groupby('week'):
+        played = [norm(t) for t in list(weekly.home_team) + list(weekly.away_team)]
+        if not 10 <= len(weekly) <= 16 or len(played) != len(set(played)) or any(t not in allteams for t in played):
+            raise ValueError('TARGET_SCHEDULE_INVALID_WEEK_' + str(w))
+    weekly = data[data.week == target_week]
+    involved = {norm(t) for t in list(weekly.home_team) + list(weekly.away_team)}
+    return sorted(allteams - involved), involved
+
+
+def target_week_role_gate(sidecar, byes, active, target_week):
+    """Explicit 'last week BYE' != 'target week BYE'. Base forecast never overwritten."""
+    aliases = {'JAC': 'JAX', 'LA': 'LAR', 'WSH': 'WAS'}
+    for entry in sidecar['bySleeper'].values():
+        team = aliases.get(str(entry.get('team')), str(entry.get('team')))
+        role = entry['roleEvaluation']
+        # Do not assert active/healthy merely because the NFL team has a scheduled game.
+        entry['targetWeekSchedule'] = {
+            'week': target_week, 'team': team,
+            'status': ('BYE' if team in byes else 'SCHEDULED' if team in active else 'UNVERIFIED'),
+        }
+        if team in byes:
+            role['status'] = 'TARGET_WEEK_BYE'
+            role['quality'] = 'VERIFIED_TARGET_BYE'
+            role['decisionAllowed'] = False
+            role['signals'] = ['Verified target week ' + str(target_week) + ' BYE; raw forecast not eligible']
+            role['action'] = 'NO START: team on target-week BYE'
+            entry['decisionProjection'] = None
+        elif role['status'] == 'BYE':
+            role['status'] = 'PREVIOUS_WEEK_BYE'
+            role['quality'] = 'RETURN_FROM_BYE_REVIEW'
+            role['decisionAllowed'] = False
+            role['signals'] = ['Previous week BYE; target week scheduled separately; role not yet reverified']
+            role['action'] = 'Review role after BYE; do not call target week BYE'
+            entry['decisionProjection'] = None
+        elif team not in active:
+            role['status'] = 'TARGET_SCHEDULE_UNVERIFIED'
+            role['quality'] = 'TEAM_UNVERIFIED'
+            role['decisionAllowed'] = False
+            role['signals'] = ['Team not verified on target-week schedule; never assume a game']
+            role['action'] = 'Verify current NFL team and schedule'
+            entry['decisionProjection'] = None
+    return sidecar
+
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--forecast',type=Path,required=True)
@@ -73,12 +127,16 @@ def main():
     snaps=snaps[(snaps.season==season)&(snaps.week<=through)]
     h=prepare_histories(stats,snaps,pd.read_csv(a.cache_dir/'db_playerids.csv',low_memory=False))
     h=overlay_current(h,source)
-    h,schedule=apply_verified_byes(h,pd.read_csv(games_path,low_memory=False),season,through)
+    schedule_data = pd.read_csv(games_path, low_memory=False)
+    h,schedule=apply_verified_byes(h,schedule_data,season,through)
+    target_byes,target_active=verified_target_schedule(schedule_data,season,forecast['targetWeek'])
     contexts=json.loads(a.contexts.read_text()) if a.contexts.exists() else []
     decision=datetime.now(timezone.utc).isoformat()
     out=annotate_forecasts(forecast,h,json.loads(a.policy.read_text()),contexts,decision)
+    out=target_week_role_gate(out,target_byes,target_active,forecast['targetWeek'])
     out['quality']={'statusCounts':dict(Counter(p['roleEvaluation']['status'] for p in out['bySleeper'].values())),
-                    'schedule':schedule,'adjustment':'NOT_PROMOTED','validatedAvailabilityModel':False,
+                    'schedule':schedule,'targetWeekByeTeams':target_byes,
+                    'targetScheduleVerified':True,'adjustment':'NOT_PROMOTED','validatedAvailabilityModel':False,
                     'observedZeroPolicy':'Explicit snap row plus positive participation in any phase required'}
     out['dataProvenance']=[snap_meta,games_meta]
     validation_path=Path(__file__).parent/'data/_MONEYBALL8_ROLE_VALIDATION.json'
