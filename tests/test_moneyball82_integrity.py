@@ -98,7 +98,7 @@ class DecisionIntegrityTests(unittest.TestCase):
         del p["horizons"]["playoffs_15_17"]
         o = review(fixture(), p, now=NOW)
         self.assertIn("LEAGUE_SCORING_SOURCE", o["missing"])
-        self.assertIn("HORIZON_PLAYOFFS_15_TO_17", o["missing"])
+        self.assertIn("HORIZON_PLAYOFFS_15_17", o["missing"])
 
     def test_stale_snapshot_no_zero_filling(self):
         p = proposal()
