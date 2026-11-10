@@ -79,9 +79,11 @@ function mb82Review_(registry, p, nowIso) {
       if (checks[k] !== true) reasons.push('CHECK_' + k.toUpperCase());
     });
   }
+  if (!Array.isArray(p.drops || []) || !Array.isArray(p.gives || [])) {
+    throw Error('8.2: movimientos deben ser listas');
+  }
   var drops = (p.drops || []).concat(p.gives || []);
-  if (!Array.isArray(p.drops || []) || !Array.isArray(p.gives || []) ||
-      drops.some(function(x) { return typeof x !== 'string' || !x; }) ||
+  if (drops.some(function(x) { return typeof x !== 'string' || !x; }) ||
       new Set(drops).size !== drops.length) throw Error('8.2: baja duplicada/inválida');
   var conflicts = [];
   (registry.decisions || []).forEach(function(d) {
