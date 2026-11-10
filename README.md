@@ -10,3 +10,8 @@ Forecast comparison, legal lineup optimization, evidence gates and incremental p
 ## Role change evidence (8.1)
 
 Consume `data/_MONEYBALL8_ROLE_2026.json.gz` with the matching original forecast vintage before using historical opportunities for a decision. The role sidecar retains original points and vetoes unreviewed utilization discrepancies; no numeric adjustment was promoted. See [diagnosis, validation and operating boundaries](docs/MONEYBALL81_ROLES.md).
+
+
+## Moneyball 8.2 — Decision Integrity
+
+Adds private, fail-closed decision continuity checks **without replacing 8.1** or publishing league data. See [installation, security boundaries and tests](docs/MONEYBALL82_DECISION_INTEGRITY.md). The private Google Drive registry is deliberately absent from GitHub; Apps Script deployment is separate and requires validation.
