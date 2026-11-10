@@ -116,33 +116,48 @@ def review(reg, proposal, *, now=None, max_age_hours=72):
         for check in ("opponent_lineup", "acceptance", "two_market_sources", "rival_risk"):
             if checks.get(check) is not True:
                 missing.append("CHECK_" + check.upper())
+    # Strategic history is a prior to review, not a permanent veto.
+    # Every active decision involving an outgoing asset is evaluated.
     conflicts = []
     for row in reg["decisions"]:
-        if row["status"] not in ("ACTIVA", "PENDIENTE"):
-            continue
+        active = row["status"] in ("ACTIVA", "PENDIENTE")
         asset = row.get("asset")
-        if row.get("protected") is True and asset in drops | gives:
-            conflicts.append(dict(id=row["id"], reason="PROTECTED_ASSET",
-                                  asset=asset, reversal=row.get("reversal", "NOT_RECORDED")))
-        if row.get("kind") == "LINEUP_GAP" and proposal.get("kind") in ("WAIVER", "DROP", "TRADE"):
-            # Warning only: gaps do not veto a movement, but must be reviewed.
+        if active and asset and asset in drops | gives and row.get("kind") != "LINEUP_GAP":
+            conflicts.append(dict(
+                id=row["id"], asset=asset, reason="STRATEGIC_HISTORY_TO_REASSESS",
+                previous_thesis=row["why"], reversal=row.get("reversal", "NOT_RECORDED")))
+        if active and row.get("kind") == "LINEUP_GAP" and proposal.get("kind") in ("WAIVER", "DROP", "TRADE"):
             if checks.get("bye_gaps_reviewed") is not True:
                 missing.append("EXISTING_BYE_GAPS")
-    override = proposal.get("reversal")
-    allowed_override = (isinstance(override, dict) and
-        all(isinstance(override.get(k), str) and override[k].strip()
-            for k in ("before", "new_evidence", "change", "cost", "source")) and
-        override.get("user_authorized") is True)
-    if conflicts and not allowed_override:
-        missing.append("PROTECTED_ASSET_REQUIRES_REVERSAL")
-    # Approval needs an explicit user's permission AND all gates; no external mutation.
-    if proposal.get("user_authorized") is not True:
-        missing.append("USER_AUTHORIZATION")
+        if proposal.get("kind") == "TRADE" and row.get("kind") == "TRADE_PAIR" and str(
+                row.get("status", "")).startswith("DESCARTADA"):
+            if set(row.get("give", [])) == gives and set(row.get("receive", [])) == receives:
+                conflicts.append(dict(
+                    id=row["id"], reason="PREVIOUSLY_REJECTED_TRADE_REASSESS",
+                    previous_thesis=row["why"], reversal=row.get("reversal", "NOT_RECORDED")))
+        if proposal.get("kind") == "TRADE" and row.get("kind") == "MANAGER_PREFERENCE" and active:
+            if (proposal.get("counterparty") or "").upper() == (row.get("manager") or "").upper():
+                if checks.get("manager_preference_reviewed") is not True:
+                    missing.append("CHECK_MANAGER_PREFERENCE")
+                if proposal.get("trade_position_type") == "SAME_POSITION":
+                    conflicts.append(dict(
+                        id=row["id"], reason="MANAGER_PREFERENCE_TO_REASSESS",
+                        previous_thesis=row["why"]))
+    rev = proposal.get("reversal")
+    complete = isinstance(rev, dict) and all(
+        isinstance(rev.get(k), str) and rev[k].strip()
+        for k in ("before", "new_evidence", "change", "cost", "source")
+    )
+    if conflicts and not complete:
+        missing.append("HISTORICAL_DECISION_NEEDS_NEW_EVIDENCE_AND_COST")
+    # User permission is needed to EXECUTE, never to recommend after an audit.
+    # This module NEVER executes a Sleeper transaction.
     missing = sorted(set(missing))
     state = "CONDICIONADA" if missing else "APROBADA"
     return dict(state=state, reasons=missing, missing=missing,
-                conflicts=conflicts, executed=False, league_id=reg["league_id"],
-                interpretation="Review-only; verify actual Sleeper state before acting")
+                conflicts=conflicts, recommendation_allowed=(not missing),
+                execution_authorized=False, executed=False, league_id=reg["league_id"],
+                interpretation="APROBADA = may recommend, NEVER execute. Verify sources and Sleeper state.")
 
 
 def reconcile_points(raw_without_fumbles, fumbles_lost, loss_penalty):

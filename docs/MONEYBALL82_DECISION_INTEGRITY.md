@@ -4,7 +4,7 @@ Moneyball 8.1 sigue siendo el motor predictivo y de detección de cambios de rol
 
 ## Qué se implementó
 
-- `moneyball82_integrity.py`: parser de registro privado exportado de Google Docs, verificación de hechos enlazados, scoring real, vigencia (72 h), 3 horizontes, todas las bajas, controles específicos de trades y protección de activos. Ausencia de datos => `CONDICIONADA`; mismatch de liga => `DESCARTADA`.
+- `moneyball82_integrity.py`: parser de registro privado exportado de Google Docs, verificación de hechos enlazados, scoring real, vigencia (72 h), 3 horizontes, todas las bajas, controles específicos de trades y revisión de antecedentes estratégicos. Ausencia de datos => `CONDICIONADA`; mismatch de liga => `DESCARTADA`.
 - `apps_script/moneyball82_integrity.gs`: puente **opcional** para el proyecto existente de Apps Script. Consulta un Google Doc privado usando una propiedad de script y expone `verificarContinuidadMoneyball()` y `evaluarMovimientoMoneyball82(proposal)`. No reescribe `Code.gs`, no crea triggers y no sube registros a GitHub.
 - Pruebas sintéticas de regresión: no cortar una defensa protegida por defecto, scoring con fumble, archivos faltantes, fotos viejas, byes, ofertas sin referencias y acciones sin autorización.
 
@@ -51,7 +51,7 @@ Las razones históricas (POR QUÉ) no sustituyen el historial de transacciones (
 }
 ```
 
-`true` significa **evidencia comprobada externamente**; nunca inventar ni rellenar los controles por defecto. Si se propone cortar un activo protegido, hace falta un bloque `reversal` con `before`, `new_evidence`, `change`, `cost`, `source` y `user_authorized:true`. Un resultado `APROBADA` significa que el expediente superó las validaciones entregadas, **no** que la fuente externa exista, que el equipo aceptó ni que la transacción se ejecutó.
+`true` significa **evidencia comprobada externamente**; nunca inventar ni rellenar los controles por defecto. Si una propuesta cambia una estrategia histórica, hace falta un bloque `reversal` con `before`, `new_evidence`, `change`, `cost`, `source` . El permiso para recomendar NO se condiciona a `user_authorized`; solamente una ejecución real requiere autorización explícita. Un resultado `APROBADA` significa que el expediente superó las validaciones entregadas, **no** que la fuente externa exista, que el equipo aceptó ni que la transacción se ejecutó.
 
 ## Límites y seguridad
 
@@ -67,3 +67,11 @@ Las razones históricas (POR QUÉ) no sustituyen el historial de transacciones (
 python -m pytest -q tests/test_moneyball82_integrity.py
 node tests/test_moneyball82_apps_script.js
 ```
+
+## Aclaración 8.2.1 — decisiones dinámicas, NO bloqueos
+
+- El historial y las tesis activas son **antecedentes**. Nunca convierten PIT DEF, KC DEF, un RB o un trade previo en un activo intocable.
+- En todo waiver/trade/corte se comparan todas las bajas viables, el mejor reemplazo real y NO HACER NADA en semana actual, próximas 3–5 y S15–17.
+- Para contrariar una decisión histórica se exige `reversal` con `before`, `new_evidence`, `change`, `cost` y `source`; **no requiere** `reversal.user_authorized` para recomendar.
+- `APROBADA` significa recomendación documentada y razonable a partir de datos aportados, **nunca** instrucción ejecutada. `execution_authorized=false` siempre; Sleeper no es modificado por estas funciones.
+- Las fuentes declaradas como válidas deben verificarse realmente por el orquestador; marcar un `check=true` sin la prueba no constituye evidencia.

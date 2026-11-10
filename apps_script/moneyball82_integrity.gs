@@ -85,24 +85,48 @@ function mb82Review_(registry, p, nowIso) {
   var drops = (p.drops || []).concat(p.gives || []);
   if (drops.some(function(x) { return typeof x !== 'string' || !x; }) ||
       new Set(drops).size !== drops.length) throw Error('8.2: baja duplicada/inválida');
+  // An earlier strategy is a reason to review, NEVER an automatic veto.
+  // Check every active decision concerning the outgoing asset, not just DST.
   var conflicts = [];
   (registry.decisions || []).forEach(function(d) {
-    if (d.status !== 'ACTIVA' && d.status !== 'PENDIENTE') return;
-    if (d.protected === true && drops.indexOf(d.asset) !== -1) {
-      conflicts.push({id: d.id, asset: d.asset, reason: 'PROTECTED_ASSET'});
+    var active = d.status === 'ACTIVA' || d.status === 'PENDIENTE';
+    if (active && d.asset && d.kind !== 'LINEUP_GAP' &&
+        drops.indexOf(d.asset) !== -1) {
+      conflicts.push({id:d.id, asset:d.asset, reason:'STRATEGIC_HISTORY_TO_REASSESS',
+        previous_thesis:d.why});
     }
-    if (d.kind === 'LINEUP_GAP' && ['WAIVER', 'DROP', 'TRADE'].indexOf(p.kind) !== -1 &&
+    if (d.kind === 'LINEUP_GAP' && active &&
+        ['WAIVER','DROP','TRADE'].indexOf(p.kind) !== -1 &&
         checks.bye_gaps_reviewed !== true) reasons.push('EXISTING_BYE_GAPS');
+    if (p.kind === 'TRADE' && d.kind === 'TRADE_PAIR' &&
+        String(d.status).indexOf('DESCARTADA') === 0 &&
+        JSON.stringify((d.give || []).slice().sort()) ===
+          JSON.stringify((p.gives || []).slice().sort()) &&
+        JSON.stringify((d.receive || []).slice().sort()) ===
+          JSON.stringify((p.receives || []).slice().sort())) {
+      conflicts.push({id:d.id,reason:'PREVIOUSLY_REJECTED_TRADE_REASSESS',
+        previous_thesis:d.why});
+    }
+    if (p.kind === 'TRADE' && d.kind === 'MANAGER_PREFERENCE' && active &&
+        String(p.counterparty || '').toUpperCase() === String(d.manager || '').toUpperCase()) {
+      if (checks.manager_preference_reviewed !== true)
+        reasons.push('CHECK_MANAGER_PREFERENCE');
+      if (p.trade_position_type === 'SAME_POSITION')
+        conflicts.push({id:d.id,reason:'MANAGER_PREFERENCE_TO_REASSESS',
+          previous_thesis:d.why});
+    }
   });
-  var r = p.reversal, reversalOK = r && r.user_authorized === true &&
-    ['before', 'new_evidence', 'change', 'cost', 'source'].every(function(k) {
-      return typeof r[k] === 'string' && r[k].trim();
+  var r = p.reversal, reversalOK = r &&
+    ['before','new_evidence','change','cost','source'].every(function(k) {
+      return typeof r[k] === 'string' && !!r[k].trim();
     });
-  if (conflicts.length && !reversalOK) reasons.push('PROTECTED_ASSET_REQUIRES_REVERSAL');
-  if (p.user_authorized !== true) reasons.push('USER_AUTHORIZATION');
+  if (conflicts.length && !reversalOK)
+    reasons.push('HISTORICAL_DECISION_NEEDS_NEW_EVIDENCE_AND_COST');
+  // user_authorized is for EXECUTION only. This function never executes.
   reasons = Array.from(new Set(reasons)).sort();
   return {state: reasons.length ? 'CONDICIONADA' : 'APROBADA',
-    reasons: reasons, conflicts: conflicts, executed: false,
+    reasons: reasons, conflicts: conflicts, recommendation_allowed: reasons.length === 0,
+    execution_authorized: false, executed: false,
     interpretation: 'Auditoría, NO ejecución en Sleeper'};
 }
 
