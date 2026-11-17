@@ -12,6 +12,7 @@ on:
       - 'moneyball72_projection.py'
       - 'moneyball8_*.py'
       - 'moneyball82_*.py'
+      - 'moneyball9_*.py'
       - '.github/workflows/moneyball5.yml'
   schedule:
     # Lunes y martes, 07:20 Monterrey
@@ -132,6 +133,22 @@ jobs:
             --forecast data/_MONEYBALL8_FORECAST_2026.json.gz \
             --source-gzip data/_MONEYBALL_FEED_2026.json.gz \
             --output data/_MONEYBALL8_ROLE_2026.json.gz
+
+      - name: Generate prospective NFL scouting artifact
+        id: pregame
+        continue-on-error: true
+        run: |
+          curl --fail --location --retry 2 https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv -o /tmp/nfl-games.csv
+          target_week=$(python -c "import gzip,json; print(1+json.load(gzip.open('data/_MONEYBALL_FEED_2026.json.gz'))['thruWeek'])")
+          cutoff=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          python moneyball9_pregame.py --season 2026 --week "$target_week" --observed-at "$cutoff" --cutoff "$cutoff" --plays .mb5-cache/pbp.parquet --schedule /tmp/nfl-games.csv --feed data/_MONEYBALL_FEED_2026.json.gz > /tmp/pregame.json
+          gzip /tmp/pregame.json
+      - uses: actions/upload-artifact@v4
+        if: steps.pregame.outcome == 'success'
+        with:
+          name: nfl-pregame-9-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/pregame.json.gz
+          retention-days: 90
 
       - name: Publicar feed comprimido
         run: |

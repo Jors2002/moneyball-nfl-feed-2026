@@ -4,6 +4,7 @@ on:
     paths:
       - 'moneyball8_*.py'
       - 'moneyball82_*.py'
+      - 'moneyball9_*.py'
       - 'moneyball5_etl.py'
       - 'moneyball6_validate.py'
       - 'tests/**'
