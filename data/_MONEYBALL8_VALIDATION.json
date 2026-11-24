@@ -1,7 +1,7 @@
 {
   "schemaVersion": 80,
   "module": "position_ppr_forecast_validation",
-  "generatedAt": "2026-11-22T20:45:37.291375+00:00",
+  "generatedAt": "2026-11-24T01:02:34.606766+00:00",
   "scoring": {
     "basis": "nflverse fantasy_points_ppr",
     "source_pass_int_points": -2,
@@ -467,9 +467,9 @@
     "training": "expanding player-week observations strictly before each target week"
   },
   "sample": {
-    "source_rows": 21083,
-    "feature_rows": 8682,
-    "predictions": 8366
+    "source_rows": 21331,
+    "feature_rows": 8799,
+    "predictions": 8483
   },
   "limitations": [
     "Conditional on recorded games; unobserved absences are NOT zeros.",
