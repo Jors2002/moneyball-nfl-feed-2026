@@ -49,6 +49,47 @@ function mb82ReadRegistry_() {
   return mb82RegistryFromText_(DocumentApp.openById(id).getBody().getText());
 }
 
+function mb82ChangeGuard_(p, now) {
+  if (p.kind === 'NO_MOVE') return [];
+  var g = p.decision_guard || {}, reasons = [];
+  var nonblank = v => typeof v === 'string' && !!v.trim();
+  var dated = v => typeof v === 'string' && /(?:Z|[+-]\d{2}:\d{2})$/.test(v) ? Date.parse(v) : NaN;
+  var baseline = dated(g.baseline_at), deadline = dated(g.deadline_at);
+  if (!Number.isFinite(baseline) || baseline > now) reasons.push('BASELINE_TIME_UNKNOWN');
+  if (!Number.isFinite(deadline) || deadline <= now) reasons.push('DEADLINE_PASSED_OR_UNKNOWN');
+  if (!nonblank(g.baseline) || !nonblank(g.counterargument)) reasons.push('BASELINE_OR_REFUTATION_MISSING');
+  var evidence = Array.isArray(g.evidence) ? g.evidence : [];
+  var valid = evidence.filter(e => e && nonblank(e.source) && nonblank(e.claim) &&
+    Number.isFinite(dated(e.published_at)) && dated(e.published_at) > baseline && dated(e.published_at) <= now);
+  if (!valid.length) reasons.push('NO_DATED_NEW_EVIDENCE');
+  var positions = g.positions;
+  if (!Array.isArray(positions) || !positions.length || positions.some(x=>!['QB','RB','WR','TE','K','DEF'].includes(x)))
+    reasons.push('AFFECTED_POSITIONS_UNKNOWN');
+  if (Array.isArray(positions) && positions.includes('DEF')) {
+    var rows = Array.isArray(g.def_reconciliation) ? g.def_reconciliation : [];
+    var matched = rows.filter(r=>r && nonblank(r.game_id) && nonblank(r.source) &&
+      Number.isFinite(r.calculated) && Number.isFinite(r.sleeper) && Math.abs(r.calculated-r.sleeper)<0.001);
+    if (new Set(matched.map(r=>r.game_id)).size<3) reasons.push('DEF_SCORING_NOT_RECONCILED');
+  }
+  if (p.kind==='LINEUP') {
+    if (!nonblank(g.outgoing_starter) || !nonblank(g.incoming_starter) || g.outgoing_starter===g.incoming_starter)
+      reasons.push('LINEUP_CHANGE_UNSPECIFIED');
+  }
+  var emergency = p.kind==='LINEUP' && g.legal_emergency===true &&
+    g.current_starter_unavailable===true && g.replacement_legal===true && valid.length>0;
+  if (!emergency) {
+    if (!['WEEK','NEXT_3_5','PLAYOFFS'].includes(g.objective) || (p.kind==='LINEUP' && g.objective!=='WEEK'))
+      reasons.push('OBJECTIVE_UNKNOWN');
+    if (!Number.isFinite(g.base_delta) || g.base_delta<=0 || !Number.isFinite(g.adverse_delta) || !nonblank(g.adverse_scenario))
+      reasons.push('NO_QUANTIFIED_ADVANTAGE_OVER_NO_MOVE');
+    if (typeof g.key_uncertainty_resolved!=='boolean') reasons.push('KEY_UNCERTAINTY_UNKNOWN');
+    if (Number.isFinite(g.adverse_delta) && g.adverse_delta<=0 &&
+        (g.key_uncertainty_resolved!==true || !Number.isFinite(deadline) || deadline-now<=7200000))
+      reasons.push('ADVANTAGE_NOT_ROBUST');
+  }
+  return reasons;
+}
+
 function mb82Review_(registry, p, nowIso) {
   if (!p || !registry || registry.schema_version !== 1 ||
       registry.league_id !== p.league_id) {
@@ -69,6 +110,7 @@ function mb82Review_(registry, p, nowIso) {
   var snapshot = Date.parse(p.snapshot_at || '');
   if (!isFinite(snapshot) || !isFinite(now) || snapshot > now ||
       (now - snapshot) > 72 * 3600000) reasons.push('SNAPSHOT_STALE_OR_UNKNOWN');
+  reasons = reasons.concat(mb82ChangeGuard_(p, now));
   MB82.horizons.forEach(function(h) {
     if (!p.horizons || !p.horizons[h] || p.horizons[h].reviewed !== true) {
       reasons.push('HORIZON_' + h.toUpperCase());
@@ -91,7 +133,7 @@ function mb82Review_(registry, p, nowIso) {
   (registry.decisions || []).forEach(function(d) {
     var active = d.status === 'ACTIVA' || d.status === 'PENDIENTE';
     if (active && d.asset && d.kind !== 'LINEUP_GAP' &&
-        drops.indexOf(d.asset) !== -1) {
+        (drops.indexOf(d.asset) !== -1 || (p.kind === 'LINEUP' && p.decision_guard && p.decision_guard.outgoing_starter === d.asset))) {
       conflicts.push({id:d.id, asset:d.asset, reason:'STRATEGIC_HISTORY_TO_REASSESS',
         previous_thesis:d.why});
     }
