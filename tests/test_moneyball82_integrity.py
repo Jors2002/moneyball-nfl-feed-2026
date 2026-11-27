@@ -31,6 +31,11 @@ def proposal(kind="WAIVER"):
         "receives": ["FREE_RB"], "user_authorized": True,
         "snapshot_at": (NOW - timedelta(hours=2)).isoformat(),
         "scoring_source": "SLEEPER_BRR",
+        "decision_guard": {"baseline_at": (NOW-timedelta(hours=3)).isoformat(),
+            "deadline_at": (NOW+timedelta(hours=1)).isoformat(), "baseline":"hold",
+            "counterargument":"incumbent role", "positions":["RB"], "objective":"WEEK",
+            "evidence":[{"source":"fixture", "claim":"material news", "published_at":(NOW-timedelta(hours=1)).isoformat()}],
+            "base_delta":3, "adverse_delta":1, "adverse_scenario":"reduced role", "key_uncertainty_resolved":True},
         "horizons": {k: {"reviewed": True} for k in
                      ("week", "next_3_5", "playoffs_15_17")},
         "checks": {**{k: True for k in (
@@ -148,6 +153,44 @@ class DecisionIntegrityTests(unittest.TestCase):
             reconcile_points(8.9, None, -2.0)
         with self.assertRaises(IntegrityError):
             reconcile_points(8.9, 1, None)
+
+
+
+    def test_late_defense_regression(self):
+        p = proposal("LINEUP")
+        g = p["decision_guard"]
+        g.update(positions=["DEF"], outgoing_starter="DST_PLAYOFF", incoming_starter="DST_STREAM",
+                 adverse_delta=-2, key_uncertainty_resolved=False)
+        o = review(fixture(), p, now=NOW)
+        self.assertEqual(o["state"], "CONDICIONADA")
+        self.assertIn("DEF_SCORING_NOT_RECONCILED", o["reasons"])
+        self.assertIn("ADVANTAGE_NOT_ROBUST", o["reasons"])
+        self.assertIn("HISTORICAL_DECISION_NEEDS_NEW_EVIDENCE_AND_COST", o["reasons"])
+        self.assertFalse(o["recommendation_allowed"])
+        g.update(adverse_delta=1, key_uncertainty_resolved=True,
+                 def_reconciliation=[dict(game_id=str(i),source="fixture",calculated=i,sleeper=i) for i in range(3)])
+        p["reversal"] = dict(before="keep",new_evidence="verified",change="stream",cost="reviewed",source="fixture")
+        self.assertEqual(review(fixture(), p, now=NOW)["state"],"APROBADA")
+        g["deadline_at"] = NOW.isoformat()
+        self.assertIn("DEADLINE_PASSED_OR_UNKNOWN", review(fixture(), p, now=NOW)["reasons"])
+
+    def test_no_new_evidence_and_no_move(self):
+        p = proposal()
+        p["decision_guard"]["evidence"][0]["published_at"] = (NOW+timedelta(hours=1)).isoformat()
+        self.assertIn("NO_DATED_NEW_EVIDENCE", review(fixture(), p, now=NOW)["reasons"])
+        p = proposal("NO_MOVE")
+        del p["decision_guard"]
+        self.assertEqual(review(fixture(), p, now=NOW)["state"],"APROBADA")
+
+    def test_optional_move_requires_guard_even_with_all_checks_true(self):
+        p = proposal()
+        del p["decision_guard"]
+        self.assertEqual(review(fixture(), p, now=NOW)["state"],"CONDICIONADA")
+
+    def test_def_scoring_duplicate_observations_do_not_count(self):
+        p = proposal()
+        p["decision_guard"].update(positions=["DEF"], def_reconciliation=[dict(game_id="same",source="fixture",calculated=7,sleeper=7)]*3)
+        self.assertIn("DEF_SCORING_NOT_RECONCILED", review(fixture(), p, now=NOW)["reasons"])
 
 
 if __name__ == "__main__":
