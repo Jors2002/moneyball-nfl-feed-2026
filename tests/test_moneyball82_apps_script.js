@@ -33,6 +33,7 @@ const complete = () => ({
     'all_drops','do_nothing','playoffs','deadline','bye_gaps_reviewed']
     .map(k => [k,true])),
   horizons:Object.fromEntries(['week','next_3_5','playoffs_15_17'].map(k=>[k,{reviewed:true}])),
+  decision_guard:{baseline_at:'2026-11-10T03:00:00Z',deadline_at:'2026-11-10T07:00:00Z',baseline:'hold',counterargument:'incumbent role',positions:['RB'],objective:'WEEK',evidence:[{source:'fixture',claim:'material news',published_at:'2026-11-10T05:00:00Z'}],base_delta:3,adverse_delta:1,adverse_scenario:'reduced role',key_uncertainty_resolved:true},
   user_authorized:true
 });
 assert.equal(c.verificarContinuidadMoneyball().decision_count,2);
@@ -61,3 +62,20 @@ assert.equal(c.mb82Review_(fake,reversed,date).recommendation_allowed,true);
 assert.equal(c.mb82Review_(fake,{...complete(),league_id:'other'},date).state,'DESCARTADA');
 assert.throws(() => c.mb82RegistryFromText_(raw+raw),/marcadores/);
 console.log('MONEYBALL82_APPS_SCRIPT_TESTS_OK: flexible-strategy checks');
+
+const incident=complete();incident.kind='LINEUP';
+Object.assign(incident.decision_guard,{positions:['DEF'],outgoing_starter:'DST_PLAYOFF',incoming_starter:'DST_STREAM',adverse_delta:-2,key_uncertainty_resolved:false});
+let r=c.mb82Review_(fake,incident,date);
+assert.equal(r.state,'CONDICIONADA');
+for(const reason of ['DEF_SCORING_NOT_RECONCILED','ADVANTAGE_NOT_ROBUST','HISTORICAL_DECISION_NEEDS_NEW_EVIDENCE_AND_COST']) assert.ok(r.reasons.includes(reason),reason);
+Object.assign(incident.decision_guard,{adverse_delta:1,key_uncertainty_resolved:true,def_reconciliation:[1,2,3].map(i=>({game_id:String(i),source:'fixture',calculated:i,sleeper:i}))});
+incident.reversal={before:'keep',new_evidence:'verified',change:'stream',cost:'reviewed',source:'fixture'};
+assert.equal(c.mb82Review_(fake,incident,date).state,'APROBADA');
+incident.decision_guard.deadline_at=date;
+assert.ok(c.mb82Review_(fake,incident,date).reasons.includes('DEADLINE_PASSED_OR_UNKNOWN'));
+let missing=complete();delete missing.decision_guard;
+assert.equal(c.mb82Review_(fake,missing,date).state,'CONDICIONADA');
+missing.kind='NO_MOVE';assert.equal(c.mb82Review_(fake,missing,date).state,'APROBADA');
+let future=complete();future.decision_guard.evidence[0].published_at='2026-11-10T08:00:00Z';
+assert.ok(c.mb82Review_(fake,future,date).reasons.includes('NO_DATED_NEW_EVIDENCE'));
+console.log('MONEYBALL_DECISION_GUARD_REGRESSION_OK');
