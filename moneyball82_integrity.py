@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timedelta, timezone
 import json
+import math
 from pathlib import Path
 
 START = "BEGIN_MONEYBALL_DECISIONS_JSON"
@@ -75,6 +76,67 @@ def _dated(value):
         return None
 
 
+def _change_guard(proposal, now):
+    """Validate explicit counterfactual and time evidence; never certify source truth."""
+    if proposal["kind"] == "NO_MOVE":
+        return []
+    g = proposal.get("decision_guard")
+    g = g if isinstance(g, dict) else {}
+    reasons = []
+    nonblank = lambda v: isinstance(v, str) and bool(v.strip())
+    def number(v):
+        return type(v) in (int, float) and math.isfinite(v)
+    baseline = _dated(g.get("baseline_at"))
+    deadline = _dated(g.get("deadline_at"))
+    if baseline is None or baseline > now:
+        reasons.append("BASELINE_TIME_UNKNOWN")
+    if deadline is None or deadline <= now:
+        reasons.append("DEADLINE_PASSED_OR_UNKNOWN")
+    if not nonblank(g.get("baseline")) or not nonblank(g.get("counterargument")):
+        reasons.append("BASELINE_OR_REFUTATION_MISSING")
+    evidence = g.get("evidence")
+    evidence = evidence if isinstance(evidence, list) else []
+    valid = []
+    for e in evidence:
+        if not isinstance(e, dict):
+            continue
+        stamp = _dated(e.get("published_at"))
+        if nonblank(e.get("source")) and nonblank(e.get("claim")) and baseline is not None and stamp is not None and baseline < stamp <= now:
+            valid.append(e)
+    if not valid:
+        reasons.append("NO_DATED_NEW_EVIDENCE")
+    positions = g.get("positions")
+    if not isinstance(positions, list) or not positions or any(x not in ("QB","RB","WR","TE","K","DEF") for x in positions):
+        reasons.append("AFFECTED_POSITIONS_UNKNOWN")
+    if isinstance(positions, list) and "DEF" in positions:
+        rows = g.get("def_reconciliation")
+        rows = rows if isinstance(rows, list) else []
+        matched = {r["game_id"] for r in rows if isinstance(r, dict)
+                   and nonblank(r.get("game_id")) and nonblank(r.get("source"))
+                   and number(r.get("calculated")) and number(r.get("sleeper"))
+                   and abs(r["calculated"] - r["sleeper"]) < .001}
+        if len(matched) < 3:
+            reasons.append("DEF_SCORING_NOT_RECONCILED")
+    lineup = proposal["kind"] == "LINEUP"
+    if lineup and (not nonblank(g.get("outgoing_starter")) or not nonblank(g.get("incoming_starter"))
+                   or g["outgoing_starter"] == g["incoming_starter"]):
+        reasons.append("LINEUP_CHANGE_UNSPECIFIED")
+    emergency = (lineup and g.get("legal_emergency") is True and
+                 g.get("current_starter_unavailable") is True and
+                 g.get("replacement_legal") is True and bool(valid))
+    if not emergency:
+        if g.get("objective") not in ("WEEK", "NEXT_3_5", "PLAYOFFS") or (lineup and g.get("objective") != "WEEK"):
+            reasons.append("OBJECTIVE_UNKNOWN")
+        if not number(g.get("base_delta")) or g["base_delta"] <= 0 or not number(g.get("adverse_delta")) or not nonblank(g.get("adverse_scenario")):
+            reasons.append("NO_QUANTIFIED_ADVANTAGE_OVER_NO_MOVE")
+        if type(g.get("key_uncertainty_resolved")) is not bool:
+            reasons.append("KEY_UNCERTAINTY_UNKNOWN")
+        if number(g.get("adverse_delta")) and g["adverse_delta"] <= 0 and (
+                g.get("key_uncertainty_resolved") is not True or deadline is None or deadline - now <= timedelta(hours=2)):
+            reasons.append("ADVANTAGE_NOT_ROBUST")
+    return reasons
+
+
 def review(reg, proposal, *, now=None, max_age_hours=72):
     """No implicit consent. Fail closed on missing data, protected cuts and old snapshots."""
     validate_registry(reg)
@@ -106,6 +168,7 @@ def review(reg, proposal, *, now=None, max_age_hours=72):
     timestamp = _dated(proposal.get("snapshot_at"))
     if timestamp is None or timestamp > now or now - timestamp > timedelta(hours=max_age_hours):
         missing.append("SNAPSHOT_STALE_OR_UNKNOWN")
+    missing.extend(_change_guard(proposal, now))
     horizons = proposal.get("horizons", {})
     if not isinstance(horizons, dict):
         horizons = {}
@@ -122,7 +185,7 @@ def review(reg, proposal, *, now=None, max_age_hours=72):
     for row in reg["decisions"]:
         active = row["status"] in ("ACTIVA", "PENDIENTE")
         asset = row.get("asset")
-        if active and asset and asset in drops | gives and row.get("kind") != "LINEUP_GAP":
+        if active and asset and (asset in drops | gives or (proposal["kind"] == "LINEUP" and isinstance(proposal.get("decision_guard"), dict) and proposal["decision_guard"].get("outgoing_starter") == asset)) and row.get("kind") != "LINEUP_GAP":
             conflicts.append(dict(
                 id=row["id"], asset=asset, reason="STRATEGIC_HISTORY_TO_REASSESS",
                 previous_thesis=row["why"], reversal=row.get("reversal", "NOT_RECORDED")))
